@@ -1,11 +1,12 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+
 # from dotenv import load_dotenv
 # import os
 
 # load_dotenv()
-DATABASE_URL = "postgresql://freelance_user:nikitka140705@localhost:5432/freelance_marketplace"
+DATABASE_URL = "postgresql://freelance_user:freelance_user@localhost:5432/freelance_marketplace"
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()

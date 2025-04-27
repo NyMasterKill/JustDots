@@ -9,10 +9,13 @@ from alembic import context
 
 # Импорты моделей
 from src.database import Base
-from src.auth.models import User
-from src.tasks.models import Category, Task
-from src.bids.models import Bid
 from src.reviews.models import Review
+from src.roles.models import Role
+from src.order_responses.models import OrderResponse
+from src.categories.models import Category
+from src.auth.models import User
+from src.skills.models import Skill
+from src.user_portfolio.models import UserSkill
 
 # Настройка конфигурации
 config = context.config
