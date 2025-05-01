@@ -13,6 +13,8 @@ services:
       - db
     networks:
       - app-network
+    volumes:
+      - ./app/:/app/app
 
   db:
     image: postgres:16

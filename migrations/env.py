@@ -9,7 +9,9 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 
 # Import models
 from app.database import Base
-from app.auth.models import User  # Ensure User model is imported
+from app.auth.models import User, BlacklistedToken
+from app.users.models import Profile, Skill, Portfolio
+from app.reviews.models import Review
 
 # this is the Alembic Config object
 config = context.config
