@@ -3,8 +3,8 @@ from ..database import Base
 import enum
 
 class UserType(enum.Enum):
-    CUSTOMER = "customer"
-    FREELANCER = "freelancer"
+    CUSTOMER = "CUSTOMER"
+    FREELANCER = "FREELANCER"
 
 class User(Base):
     __tablename__ = "users"

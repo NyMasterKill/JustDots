@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from .auth.routes import router as auth_router
-from tasks.routes import router as tasks_router
-
+from .tasks.routes import router as tasks_router
 
 app = FastAPI(title="Freelance Marketplace")
 

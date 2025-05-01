@@ -1,26 +1,54 @@
-from sqlalchemy import Column, Integer, String, Text, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Integer, String, Text, Float, DateTime, Enum as SQLAlchemyEnum
+from sqlalchemy import ForeignKey
 from ..database import Base
+import enum
 
 
-# Перечисления для полей задачи
-CATEGORIES = ["Разработка", "Дизайн", "Программирование", "Копирайтинг", "Другое"]
-REQUIREMENTS = ["Базовый", "Средний", "Продвинутый"]
-STATUSES = ["Открытая", "Закрытая", "В процессе"]
+class TaskStatus(enum.Enum):
+    OPEN = "Открытая"
+    IN_PROGRESS = "В процессе"
+    CLOSED = "Закрытая"
+
+
+class TaskSkillLevel(enum.Enum):
+    BASIC = "Базовый"
+    MEDIUM = "Средний"
+    ADVANCED = "Продвинутый"
+
+
+class TaskCategory(enum.Enum):
+    DEVELOPMENT = "Разработка"
+    DESIGN = "Дизайн"
+    PROGRAMMING = "Программирование"
+    COPYWRITING = "Копирайтинг"
+    OTHER = "Другое"
+
+
+# Функция для извлечения значений enum
+def enum_values(enum_class):
+    return [e.value for e in enum_class]
+
 
 class Task(Base):
     __tablename__ = "tasks"
 
     id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, index=True)
-    description = Column(Text)
-    budget_from = Column(String)
-    budget_to = Column(String)
-    deadline = Column(String, nullable=True)
-    category = Column(String)
-    requirements = Column(String)
-    status = Column(String)
-
-    # Привязка к пользователю
-    owner_id = Column(Integer, ForeignKey("users.id"))
-    owner = relationship("User", back_populates="tasks")
+    title = Column(String(255), nullable=False)
+    description = Column(Text, nullable=False)
+    budget_min = Column(Float, nullable=True)
+    budget_max = Column(Float, nullable=True)
+    deadline = Column(DateTime, nullable=True)
+    category = Column(
+        SQLAlchemyEnum(TaskCategory, values_callable=lambda x: enum_values(TaskCategory)),
+        nullable=False
+    )
+    custom_category = Column(String(255), nullable=True)
+    skill_level = Column(
+        SQLAlchemyEnum(TaskSkillLevel, values_callable=lambda x: enum_values(TaskSkillLevel)),
+        nullable=False
+    )
+    status = Column(
+        SQLAlchemyEnum(TaskStatus, values_callable=lambda x: enum_values(TaskStatus)),
+        default=TaskStatus.OPEN.value
+    )
+    owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
