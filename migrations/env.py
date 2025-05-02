@@ -12,6 +12,7 @@ from app.database import Base
 from app.auth.models import User, BlacklistedToken
 from app.users.models import Profile, Skill, Portfolio
 from app.reviews.models import Review
+from app.tasks.models import Task, Application
 
 # this is the Alembic Config object
 config = context.config

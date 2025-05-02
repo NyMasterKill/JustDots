@@ -1,6 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
+from psycopg.errors import UniqueViolation
 from .models import User, UserType, BlacklistedToken
 from .schemas import UserCreate, UserResponse, UserLogin, Token
 from .dependencies import hash_password, verify_password, create_access_token, get_current_user, oauth2_scheme
@@ -10,10 +12,16 @@ router = APIRouter()
 
 @router.post("/register", response_model=UserResponse)
 async def register_user(user: UserCreate, db: Session = Depends(get_db)):
-    db_user = db.query(User).filter(User.email == user.email).first()
+    # Проверяем, существует ли пользователь с таким email или username
+    db_user = db.query(User).filter(
+        (User.email == user.email) | (User.username == user.username)
+    ).first()
     if db_user:
-        raise HTTPException(status_code=400, detail="Электронная почта уже зарегистрирована")
-    
+        if db_user.email == user.email:
+            raise HTTPException(status_code=400, detail="Электронная почта уже зарегистрирована")
+        if db_user.username == user.username:
+            raise HTTPException(status_code=400, detail="Имя пользователя уже занято")
+
     hashed_password = hash_password(user.password)
     if user.user_type == "customer":
         user_type = UserType.CUSTOMER
@@ -21,7 +29,7 @@ async def register_user(user: UserCreate, db: Session = Depends(get_db)):
         user_type = UserType.FREELANCER
     else:
         raise HTTPException(status_code=400, detail=f"Недопустимый тип пользователя: {user.user_type}")
-    
+
     db_user = User(
         username=user.username,
         first_name=user.first_name,
@@ -31,10 +39,20 @@ async def register_user(user: UserCreate, db: Session = Depends(get_db)):
         hashed_password=hashed_password,
         user_type=user_type
     )
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-    
+
+    try:
+        db.add(db_user)
+        db.commit()
+        db.refresh(db_user)
+    except IntegrityError as e:
+        db.rollback()
+        if isinstance(e.orig, UniqueViolation):
+            if "ix_users_username" in str(e.orig):
+                raise HTTPException(status_code=400, detail="Имя пользователя уже занято")
+            if "ix_users_email" in str(e.orig):
+                raise HTTPException(status_code=400, detail="Электронная почта уже зарегистрирована")
+        raise HTTPException(status_code=500, detail="Ошибка при регистрации пользователя")
+
     return UserResponse(
         id=db_user.id,
         username=db_user.username,
@@ -56,11 +74,11 @@ async def login_user(user: UserLogin, db: Session = Depends(get_db)):
         query = query.filter(User.username == user.username)
     else:
         raise HTTPException(status_code=400, detail="Необходимо указать email или username")
-    
+
     db_user = query.first()
     if not db_user or not verify_password(user.password, db_user.hashed_password):
         raise HTTPException(status_code=401, detail="Неверный email, username или пароль")
-    
+
     access_token = create_access_token(data={"sub": db_user.email})
     return {"access_token": access_token, "token_type": "bearer"}
 
@@ -72,11 +90,11 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
         query = query.filter(User.email == input_value)
     else:
         query = query.filter(User.username == input_value)
-    
+
     db_user = query.first()
     if not db_user or not verify_password(form_data.password, db_user.hashed_password):
         raise HTTPException(status_code=401, detail="Неверный email, username или пароль")
-    
+
     access_token = create_access_token(data={"sub": db_user.email})
     return {"access_token": access_token, "token_type": "bearer"}
 
