@@ -1,6 +1,8 @@
 from pydantic import BaseModel, EmailStr, validator
 from .models import UserType
-from ..users.schemas import Profile, Skill  # Импортируем Skill
+from ..users.schemas import Profile, Skill
+from datetime import datetime
+import re
 
 class UserCreate(BaseModel):
     username: str
@@ -11,6 +13,16 @@ class UserCreate(BaseModel):
     password: str
     password_confirm: str
     user_type: UserType
+
+    @validator("username")
+    def validate_username(cls, v):
+        # Регулярное выражение: только латинские буквы, цифры, подчёркивания, длина 3-50
+        if not re.match(r"^[a-zA-Z0-9_]{3,50}$", v):
+            raise ValueError(
+                "Username должен содержать только латинские буквы, цифры и подчёркивания, "
+                "без пробелов, длиной от 3 до 50 символов"
+            )
+        return v
 
     @validator("password_confirm")
     def passwords_match(cls, v, values, **kwargs):
@@ -26,8 +38,10 @@ class UserResponse(BaseModel):
     patronymic: str | None
     email: EmailStr
     user_type: str
-    profile: Profile | None  # Делаем profile опциональным
-    skills: list[Skill] = []  # Добавляем skills
+    created_at: str | None
+    profile: Profile | None
+    skills: list[Skill] = []
+    completed_tasks_count: int = 0  
 
     class Config:
         from_attributes = True

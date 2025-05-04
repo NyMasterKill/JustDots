@@ -18,6 +18,8 @@ app.include_router(auth_router, prefix="/auth", tags=["Auth"])
 app.include_router(users_router, prefix="/users", tags=["Users"])
 app.include_router(tasks_router)
 
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+
 @app.get("/")
 async def root():
-    return {"message": "Welcome to Freelance Marketplace"}
+    return {"message": "Welcome to Freelance Marketplace"}  

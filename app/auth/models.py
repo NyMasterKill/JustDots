@@ -20,7 +20,7 @@ class User(Base):
     user_type = Column(Enum(UserType), nullable=False)
     created_at = Column(DateTime, default=func.now())  
 
-    profile = relationship("Profile", back_populates="user", uselist=False)  # Добавляем связь
+    profile = relationship("Profile", back_populates="user", uselist=False)
 
 class BlacklistedToken(Base):
     __tablename__ = "blacklisted_tokens"
