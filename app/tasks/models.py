@@ -3,18 +3,15 @@ from sqlalchemy import ForeignKey
 from ..database import Base
 import enum
 
-
 class TaskStatus(enum.Enum):
     OPEN = "Открытая"
     IN_PROGRESS = "В процессе"
     CLOSED = "Закрытая"
 
-
 class TaskSkillLevel(enum.Enum):
     BASIC = "Базовый"
     MEDIUM = "Средний"
     ADVANCED = "Продвинутый"
-
 
 class TaskCategory(enum.Enum):
     DEVELOPMENT = "Разработка"
@@ -23,11 +20,9 @@ class TaskCategory(enum.Enum):
     COPYWRITING = "Копирайтинг"
     OTHER = "Другое"
 
-
 # Функция для извлечения значений enum
 def enum_values(enum_class):
     return [e.value for e in enum_class]
-
 
 class Task(Base):
     __tablename__ = "tasks"
@@ -49,6 +44,28 @@ class Task(Base):
     )
     status = Column(
         SQLAlchemyEnum(TaskStatus, values_callable=lambda x: enum_values(TaskStatus)),
-        default=TaskStatus.OPEN.value
+        default=TaskStatus.OPEN.value,
+        nullable=False
     )
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    freelancer_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+
+class ApplicationStatus(enum.Enum):
+    PENDING = "На рассмотрении"
+    ACCEPTED = "Принята"
+    REJECTED = "Отклонена"
+
+class Application(Base):
+    __tablename__ = "applications"
+
+    id = Column(Integer, primary_key=True, index=True)
+    task_id = Column(Integer, ForeignKey("tasks.id"), nullable=False)
+    freelancer_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    comment = Column(Text, nullable=True)
+    proposed_price = Column(Float, nullable=True)
+    proposed_deadline = Column(DateTime, nullable=True)
+    status = Column(
+        SQLAlchemyEnum(ApplicationStatus, values_callable=lambda x: enum_values(ApplicationStatus)),
+        default=ApplicationStatus.PENDING.value,
+        nullable=False
+    )

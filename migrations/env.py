@@ -1,8 +1,6 @@
 from logging.config import fileConfig
 from sqlalchemy import engine_from_config, pool
 from alembic import context
-
-
 import os
 import sys
 
@@ -11,8 +9,11 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 
 # Import models
 from app.database import Base
-from app.auth.models import User  # Ensure User model is imported
-from app.tasks.models import Task
+from app.auth.models import User, BlacklistedToken
+from app.users.models import Profile, Skill, Portfolio
+from app.reviews.models import Review
+from app.tasks.models import Task, Application
+
 # this is the Alembic Config object
 config = context.config
 
