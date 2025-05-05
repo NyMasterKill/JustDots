@@ -3,7 +3,7 @@ from typing import List
 from pydantic.networks import AnyUrl
 from pydantic_core import PydanticCustomError
 from pydantic import TypeAdapter
-from fastapi import UploadFile
+import re
 
 class SkillBase(BaseModel):
     name: str
@@ -61,8 +61,32 @@ class PortfolioCreate(BaseModel):
     url: str | None = None
 
 class ProfileUpdate(BaseModel):
-    bio: str | None = None
-    rating: float | None = None
+    username: str | None = None
+    first_name: str | None = None
+    last_name: str | None = None
+    patronymic: str | None = None
+    email: str | None = None
+    bio: str | None = None  # Возвращаем bio в схему
     skills: List[SkillCreate] | None = None
     portfolio: List[PortfolioCreate] | None = None
-    avatar: UploadFile | None = None  # Добавляем поддержку загрузки файла
+
+    @validator("username")
+    def validate_username(cls, v):
+        if v and not re.match(r"^[a-zA-Z0-9_]{3,50}$", v):
+            raise ValueError(
+                "Username должен содержать только латинские буквы, цифры и подчёркивания, "
+                "без пробелов, длиной от 3 до 50 символов"
+            )
+        return v
+
+    @validator("email", pre=True)
+    def validate_email(cls, v):
+        if v and "@" not in v:
+            raise ValueError("Invalid email format")
+        return v
+
+    @validator("bio")
+    def validate_bio(cls, v):
+        if v and len(v) > 500:  # Ограничим до 500 символов
+            raise ValueError("Bio must not exceed 500 characters")
+        return v

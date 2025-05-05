@@ -4,56 +4,125 @@ from ..auth.models import User, UserType
 from ..auth.dependencies import get_current_user
 from ..auth.schemas import UserResponse
 from .models import Profile, Skill, Portfolio
-from .schemas import SkillCreate, PortfolioCreate
+from .schemas import SkillCreate, PortfolioCreate, ProfileUpdate
 from ..database import get_db
 from ..tasks.models import Task, TaskStatus
 import os
-import shutil
 from pathlib import Path
+from sqlalchemy.exc import IntegrityError
+from psycopg.errors import UniqueViolation
+
+
+
 
 router = APIRouter()
 
-UPLOAD_DIR = Path("uploads/avatars")
-UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
-
 @router.put("/profile/update", response_model=UserResponse)
 async def update_profile(
-    bio: str = Form(None),  # Делаем опциональным для совместимости с текущим запросом
-    avatar: UploadFile = File(None),  # Опциональный файл
+    profile_data: ProfileUpdate,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+    # Обновление данных пользователя (User)
+    if profile_data.username is not None:
+        current_user.username = profile_data.username
+    if profile_data.first_name is not None:
+        current_user.first_name = profile_data.first_name
+    if profile_data.last_name is not None:
+        current_user.last_name = profile_data.last_name
+    if profile_data.patronymic is not None:
+        current_user.patronymic = profile_data.patronymic
+    if profile_data.email is not None:
+        current_user.email = profile_data.email
+
+    # Обновление профиля (Profile)
     profile = db.query(Profile).filter(Profile.user_id == current_user.id).first()
-    
     if not profile:
         profile = Profile(user_id=current_user.id)
         db.add(profile)
-        db.commit()  # Сохраняем профиль перед обновлением
+        db.commit()
 
-    # Обновляем bio, если оно передано
-    if bio is not None:
-        profile.bio = bio
+    if profile_data.bio is not None:
+        profile.bio = profile_data.bio
+
+    # Обновление skills и portfolio (пока не реализовано полностью)
+    if profile_data.skills:
+        pass
+    if profile_data.portfolio:
+        pass
+
+    try:
+        db.commit()
+    except IntegrityError as e:
+        db.rollback()
+        if isinstance(e.orig, UniqueViolation):
+            if "ix_users_username" in str(e.orig):
+                raise HTTPException(status_code=400, detail="Данный логин уже используется, попробуйте другой")
+            elif "ix_users_email" in str(e.orig):
+                raise HTTPException(status_code=400, detail="Данный email уже используется, попробуйте другой")
+        raise HTTPException(status_code=500, detail="Произошла ошибка при обновлении профиля")
+
+    db.refresh(current_user)
+
+    # Подсчёт завершённых задач
+    if current_user.user_type == UserType.CUSTOMER:
+        completed_tasks_count = db.query(Task).filter(
+            Task.owner_id == current_user.id,
+            Task.status == TaskStatus.CLOSED.value
+        ).count()
+    else:  # FREELANCER
+        completed_tasks_count = db.query(Task).filter(
+            Task.freelancer_id == current_user.id,
+            Task.status == TaskStatus.CLOSED.value
+        ).count()
+
+    profile_data_response = current_user.profile
+    if profile_data_response:
+        profile_data_response.portfolio = current_user.portfolio if current_user.portfolio else []
+
+    return UserResponse(
+        id=current_user.id,
+        username=current_user.username,
+        first_name=current_user.first_name,
+        last_name=current_user.last_name,
+        patronymic=current_user.patronymic,
+        email=current_user.email,
+        user_type=current_user.user_type.value,
+        created_at=current_user.created_at.isoformat() if current_user.created_at else None,
+        profile=profile_data_response,
+        skills=current_user.skills,
+        completed_tasks_count=completed_tasks_count
+    )
+
+@router.put("/profile/avatar", response_model=UserResponse)
+async def update_avatar(
+    avatar: UploadFile = File(None),  # Только аватарка через File
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    # Обновление профиля (Profile)
+    profile = db.query(Profile).filter(Profile.user_id == current_user.id).first()
+    if not profile:
+        profile = Profile(user_id=current_user.id)
+        db.add(profile)
+        db.commit()
 
     # Обработка загрузки аватарки
-    if avatar:
-        # Проверяем тип файла
+    if avatar:  # Если аватарка передана
         allowed_extensions = {".png", ".jpg", ".jpeg"}
         file_extension = os.path.splitext(avatar.filename)[1].lower()
         if file_extension not in allowed_extensions:
             raise HTTPException(status_code=400, detail="Only PNG, JPG, and JPEG files are allowed")
         
-        # Проверяем размер файла (максимум 5 МБ)
         max_size = 5 * 1024 * 1024  # 5 МБ
         content = await avatar.read()
         if len(content) > max_size:
             raise HTTPException(status_code=400, detail="File size must not exceed 5 MB")
         
-        # Формируем путь для сохранения файла
         file_path = UPLOAD_DIR / f"{current_user.id}{file_extension}"
         with open(file_path, "wb") as f:
             f.write(content)
         
-        # Сохраняем путь в базе данных
         profile.avatar_url = f"/uploads/avatars/{current_user.id}{file_extension}"
 
     db.commit()
@@ -71,9 +140,9 @@ async def update_profile(
             Task.status == TaskStatus.CLOSED.value
         ).count()
 
-    profile_data = current_user.profile
-    if profile_data:
-        profile_data.portfolio = current_user.portfolio if current_user.portfolio else []
+    profile_data_response = current_user.profile
+    if profile_data_response:
+        profile_data_response.portfolio = current_user.portfolio if current_user.portfolio else []
 
     return UserResponse(
         id=current_user.id,
@@ -84,7 +153,7 @@ async def update_profile(
         email=current_user.email,
         user_type=current_user.user_type.value,
         created_at=current_user.created_at.isoformat() if current_user.created_at else None,
-        profile=profile_data,
+        profile=profile_data_response,
         skills=current_user.skills,
         completed_tasks_count=completed_tasks_count
     )
@@ -123,3 +192,6 @@ async def get_user_profile(user_id: int, db: Session = Depends(get_db)):
         skills=user.skills,
         completed_tasks_count=completed_tasks_count
     )
+
+UPLOAD_DIR = Path("uploads/avatars")
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
