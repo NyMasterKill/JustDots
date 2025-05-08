@@ -12,6 +12,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 router = APIRouter(prefix="/reviews", tags=["Reviews"])
 
+
 @router.post("/{task_id}/review", response_model=ReviewResponse, status_code=status.HTTP_201_CREATED)
 async def create_review(
     task_id: int,
@@ -19,37 +20,38 @@ async def create_review(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    # 1. Проверка существования задачи
+    # 1. Проверяем задачу
     task = db.query(Task).filter(Task.id == task_id).first()
     if not task:
         raise HTTPException(status_code=404, detail="Задача не найдена")
-
-    # 2. Проверка статуса задачи
     if task.status != TaskStatus.CLOSED:
-        raise HTTPException(status_code=400, detail="Задача должна быть закрыта для оставления отзыва")
+        raise HTTPException(status_code=400, detail="Задача должна быть закрыта для отзыва")
 
-    # 3. Проверка прав доступа (только участники задачи)
+    # 2. Проверяем, что пользователь участник задачи
     if current_user.id not in [task.owner_id, task.freelancer_id]:
-        raise HTTPException(status_code=403, detail="Вы не можете оставить отзыв для этой задачи")
+        raise HTTPException(status_code=403, detail="Вы не участвовали в этой задаче")
 
-    # 4. Определение получателя отзыва
+    # 3. Кто кому оставляет отзыв
     if current_user.id == task.owner_id:
-        reviewer_id = task.freelancer_id  # Фрилансер оставляет отзыв заказчику
+        reviewer_id = task.freelancer_id  # заказчик -> фрилансер
     else:
-        reviewer_id = task.owner_id       # Заказчик оставляет отзыв фрилансеру
+        reviewer_id = task.owner_id       # фрилансер -> заказчик
 
-    # 5. Проверка наличия предыдущего отзыва
+    # 4. Проверяем, не был ли уже оставлен отзыв по этой задаче
     existing_review = db.query(Review).filter(
         Review.user_id == current_user.id,
-        Review.reviewer_id == reviewer_id
+        Review.reviewer_id == reviewer_id,
+        Review.task_id == task_id
     ).first()
-    if existing_review:
-        raise HTTPException(status_code=400, detail="Вы уже оставили отзыв для этого пользователя")
 
-    # 6. Создание отзыва
+    if existing_review:
+        raise HTTPException(status_code=400, detail="Вы уже оставили отзыв по этой задаче")
+
+    # 5. Создаем отзыв
     new_review = Review(
         user_id=current_user.id,
         reviewer_id=reviewer_id,
+        task_id=task_id,
         comment=review_data.comment,
         score=review_data.score
     )
@@ -57,7 +59,7 @@ async def create_review(
     db.commit()
     db.refresh(new_review)
 
-    # 7. Обновление рейтинга получателя отзыва
+    # 6. Обновляем средний рейтинг получателя
     reviews = db.query(Review).filter(Review.reviewer_id == reviewer_id).all()
     total_score = sum(review.score for review in reviews)
     average_rating = total_score / len(reviews) if reviews else 0.0
@@ -66,13 +68,16 @@ async def create_review(
     if not reviewer:
         raise HTTPException(status_code=404, detail="Пользователь для отзыва не найден")
 
-    # Обновляем рейтинг в users.rating
     reviewer.rating = average_rating
-
-    # Обновляем рейтинг в profile.rating
     if reviewer.profile:
         reviewer.profile.rating = average_rating
 
     db.commit()
 
-    return ReviewResponse.model_validate(new_review)
+@router.get("/user/{user_id}", response_model=list[ReviewResponse])
+async def get_reviews_by_user(
+    user_id: int,
+    db: Session = Depends(get_db)
+):
+    reviews = db.query(Review).filter(Review.reviewer_id == user_id).all()
+    return reviews

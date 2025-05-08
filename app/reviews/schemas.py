@@ -12,10 +12,12 @@ class ReviewCreate(BaseModel):
             raise ValueError("Оценка должна быть от 1 до 5")
         return v
 
+
 class ReviewResponse(BaseModel):
     id: int
     user_id: int
     reviewer_id: int
+    task_id: int  # Новое поле
     comment: Optional[str]
     score: float
     created_at: datetime

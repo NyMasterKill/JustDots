@@ -10,7 +10,7 @@ from app.tasks.models import TaskStatus
 
 # revision identifiers, used by Alembic.
 revision = '6b8f2d3e4a5b'
-down_revision = '8822d5d2ee23'
+down_revision = '5a1649caf4a3'
 branch_labels = None
 depends_on = None
 

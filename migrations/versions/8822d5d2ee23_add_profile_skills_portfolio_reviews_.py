@@ -13,7 +13,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision: str = '8822d5d2ee23'
-down_revision: Union[str, None] = '5a1649caf4a3'
+down_revision: Union[str, None] = '6b8f2d3e4a5b'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -45,14 +45,17 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('reviewer_id', sa.Integer(), nullable=False),
+    sa.Column('task_id', sa.Integer(), nullable=False),
     sa.Column('comment', sa.Text(), nullable=True),
     sa.Column('score', sa.Float(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['reviewer_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['task_id'], ['tasks.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_reviews_id'), 'reviews', ['id'], unique=False)
+    op.create_index(op.f('ix_reviews_task_id'), 'reviews', ['task_id'], unique=False)
     op.create_table('skills',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
@@ -81,6 +84,7 @@ def downgrade() -> None:
                existing_nullable=False)
     op.drop_index(op.f('ix_skills_id'), table_name='skills')
     op.drop_table('skills')
+    op.drop_index(op.f('ix_reviews_task_id'), table_name='reviews')
     op.drop_index(op.f('ix_reviews_id'), table_name='reviews')
     op.drop_table('reviews')
     op.drop_index(op.f('ix_profiles_id'), table_name='profiles')
