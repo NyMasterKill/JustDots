@@ -5,7 +5,8 @@ from sqlalchemy.exc import IntegrityError
 from psycopg.errors import UniqueViolation
 from .models import User, UserType, BlacklistedToken
 from .schemas import UserCreate, UserResponse, UserLogin, Token
-from .dependencies import hash_password, verify_password, create_access_token, create_refresh_token, verify_refresh_token, get_current_user, oauth2_scheme
+from .dependencies import hash_password, verify_password, create_access_token, create_refresh_token, \
+    verify_refresh_token, get_current_user, oauth2_scheme
 from ..database import get_db
 from datetime import datetime
 from ..tasks.models import Task, TaskStatus
@@ -68,6 +69,7 @@ async def register_user(user: UserCreate, db: Session = Depends(get_db)):
         completed_tasks_count=0
     )
 
+
 @router.post("/login", response_model=Token)
 async def login_user(user: UserLogin, response: Response, db: Session = Depends(get_db)):
     query = db.query(User)
@@ -84,7 +86,6 @@ async def login_user(user: UserLogin, response: Response, db: Session = Depends(
 
     access_token = create_access_token(data={"sub": db_user.email})
     refresh_token = create_refresh_token(data={"sub": db_user.email})
-    
     # Устанавливаем refresh token в HTTP-only cookie
     response.set_cookie(
         key="refresh_token",
@@ -189,5 +190,6 @@ async def get_current_user_info(current_user: User = Depends(get_current_user), 
         created_at=current_user.created_at.isoformat() if current_user.created_at else None,
         profile=profile_data,
         skills=current_user.skills,
-        completed_tasks_count=completed_tasks_count
-    )   
+        completed_tasks_count=completed_tasks_count,
+        rating = current_user.rating
+    )

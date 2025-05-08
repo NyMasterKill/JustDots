@@ -45,14 +45,17 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('reviewer_id', sa.Integer(), nullable=False),
+    sa.Column('task_id', sa.Integer(), nullable=False),
     sa.Column('comment', sa.Text(), nullable=True),
     sa.Column('score', sa.Float(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['reviewer_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['task_id'], ['tasks.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_reviews_id'), 'reviews', ['id'], unique=False)
+    op.create_index(op.f('ix_reviews_task_id'), 'reviews', ['task_id'], unique=False)
     op.create_table('skills',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
@@ -81,6 +84,7 @@ def downgrade() -> None:
                existing_nullable=False)
     op.drop_index(op.f('ix_skills_id'), table_name='skills')
     op.drop_table('skills')
+    op.drop_index(op.f('ix_reviews_task_id'), table_name='reviews')
     op.drop_index(op.f('ix_reviews_id'), table_name='reviews')
     op.drop_table('reviews')
     op.drop_index(op.f('ix_profiles_id'), table_name='profiles')

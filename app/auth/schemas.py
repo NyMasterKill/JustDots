@@ -1,5 +1,6 @@
 from pydantic import BaseModel, EmailStr, validator
 from .models import UserType
+from typing import Optional
 from ..users.schemas import Profile, Skill
 from datetime import datetime
 import re
@@ -41,7 +42,8 @@ class UserResponse(BaseModel):
     created_at: str | None
     profile: Profile | None
     skills: list[Skill] = []
-    completed_tasks_count: int = 0  
+    rating: Optional[float] = None
+    completed_tasks_count: int = 0
 
     class Config:
         from_attributes = True

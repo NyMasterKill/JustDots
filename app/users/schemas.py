@@ -4,6 +4,7 @@ from pydantic.networks import AnyUrl
 from pydantic_core import PydanticCustomError
 from pydantic import TypeAdapter
 import re
+from fastapi import UploadFile
 
 class SkillBase(BaseModel):
     name: str

@@ -14,8 +14,6 @@ from psycopg.errors import UniqueViolation
 from sqlalchemy import delete
 
 
-
-
 router = APIRouter()
 
 @router.put("/profile/update", response_model=UserResponse)
@@ -181,7 +179,6 @@ async def get_user_profile(user_id: int, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
-    
     if user.user_type == UserType.CUSTOMER:
         completed_tasks_count = db.query(Task).filter(
             Task.owner_id == user.id,
@@ -211,5 +208,3 @@ async def get_user_profile(user_id: int, db: Session = Depends(get_db)):
         completed_tasks_count=completed_tasks_count
     )
 
-UPLOAD_DIR = Path("uploads/avatars")
-UPLOAD_DIR.mkdir(parents=True, exist_ok=True)

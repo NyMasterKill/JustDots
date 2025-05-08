@@ -1,20 +1,25 @@
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 from datetime import datetime
+from typing import Optional
 
-class ReviewBase(BaseModel):
-    comment: str | None = None
+class ReviewCreate(BaseModel):
+    comment: Optional[str] = None
     score: float
 
-    @validator("score")
+    @field_validator("score")
     def validate_score(cls, v):
         if v < 1 or v > 5:
-            raise ValueError("Score must be between 1 and 5")
+            raise ValueError("Оценка должна быть от 1 до 5")
         return v
 
-class Review(ReviewBase):
+
+class ReviewResponse(BaseModel):
     id: int
     user_id: int
     reviewer_id: int
+    task_id: int  # Новое поле
+    comment: Optional[str]
+    score: float
     created_at: datetime
 
     class Config:
