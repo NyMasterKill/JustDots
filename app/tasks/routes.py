@@ -97,6 +97,40 @@ async def get_public_tasks(
     tasks = query.offset(skip).limit(limit).all()
     return [TaskResponse.model_validate(task.__dict__) for task in tasks]
 
+@router.get("/in-progress-tasks", response_model=List[TaskResponse])
+async def get_in_progress_tasks(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    skip: int = Query(0, ge=0, description="Пропустить первые N записей"),
+    limit: int = Query(10, ge=1, le=100, description="Максимальное количество записей")
+):
+    print(f"Processing get_in_progress_tasks with skip: {skip}, limit: {limit}, user_id: {current_user.id}")
+    if current_user.user_type != UserType.FREELANCER:
+        raise HTTPException(status_code=403, detail="Только фрилансеры могут просматривать свои задачи в процессе")
+    tasks = db.query(Task).filter(
+        and_(Task.freelancer_id == current_user.id, Task.status == TaskStatus.IN_PROGRESS)
+    ).offset(skip).limit(limit).all()
+    return [TaskResponse.model_validate(task.__dict__) for task in tasks]
+
+
+@router.get("/my-applications", response_model=List[ApplicationResponse])
+async def get_my_applications(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    status: Optional[ApplicationStatus] = Query(None, description="Фильтр по статусу заявки"),
+    skip: int = Query(0, ge=0, description="Пропустить первые N записей"),
+    limit: int = Query(10, ge=1, le=100, description="Максимальное количество записей")
+):
+    if current_user.user_type != UserType.FREELANCER:
+        raise HTTPException(status_code=403, detail="Только фрилансеры могут просматривать свои заявки")
+    
+    query = db.query(Application).filter(Application.freelancer_id == current_user.id)
+    if status:
+        query = query.filter(Application.status == status)
+    
+    applications = query.offset(skip).limit(limit).all()
+    return [ApplicationResponse.model_validate(app.__dict__) for app in applications]
+
 # Получить одну задачу по ID (для заказчиков)
 @router.get("/{task_id}", response_model=TaskResponse)
 async def get_task(
@@ -104,13 +138,12 @@ async def get_task(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    print(f"Processing get_task with task_id: {task_id}")  # Отладка
     if current_user.user_type != UserType.CUSTOMER:
         raise HTTPException(status_code=403, detail="Только заказчики могут просматривать свои задачи")
-
     task = db.query(Task).filter(Task.id == task_id, Task.owner_id == current_user.id).first()
     if not task:
         raise HTTPException(status_code=404, detail="Задача не найдена")
-
     return TaskResponse.model_validate(task.__dict__)
 
 # Получить публичную задачу по ID (для фрилансеров)
@@ -173,61 +206,34 @@ async def get_task_applications(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    if current_user.user_type != UserType.CUSTOMER:
-        raise HTTPException(status_code=403, detail="Только заказчики могут просматривать заявки на свои задачи")
-
-    task = db.query(Task).filter(Task.id == task_id, Task.owner_id == current_user.id).first()
+    # Проверяем, существует ли задача
+    task = db.query(Task).filter(Task.id == task_id).first()
     if not task:
         raise HTTPException(status_code=404, detail="Задача не найдена")
 
-    applications = db.query(Application).filter(Application.task_id == task_id).all()
+    # Логика для заказчика
+    if current_user.user_type == UserType.CUSTOMER:
+        if task.owner_id != current_user.id:
+            raise HTTPException(status_code=403, detail="Вы не являетесь владельцем этой задачи")
+        applications = db.query(Application).filter(Application.task_id == task_id).all()
+
+    # Логика для фрилансера
+    elif current_user.user_type == UserType.FREELANCER:
+        applications = db.query(Application).filter(
+            and_(
+                Application.task_id == task_id,
+                Application.freelancer_id == current_user.id
+            )
+        ).all()
+        if not applications:
+            raise HTTPException(status_code=404, detail="У вас нет заявок на эту задачу")
+    else:
+        raise HTTPException(status_code=403, detail="Недопустимый тип пользователя")
+
     return [ApplicationResponse.model_validate(app.__dict__) for app in applications]
 
-# Принять заявку на задачу (для заказчиков)
-@router.post("/{task_id}/applications/{application_id}/accept", response_model=TaskResponse)
-async def accept_application(
-    task_id: int,
-    application_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    if current_user.user_type != UserType.CUSTOMER:
-        raise HTTPException(status_code=403, detail="Только заказчики могут принимать заявки")
+# Получить все заявки фрилансера (без указания task_id)
 
-    task = db.query(Task).filter(Task.id == task_id, Task.owner_id == current_user.id).first()
-    if not task:
-        raise HTTPException(status_code=404, detail="Задача не найдена")
-
-    if task.status != TaskStatus.OPEN:
-        raise HTTPException(status_code=400, detail="Задача уже в процессе или закрыта")
-
-    application = db.query(Application).filter(
-        and_(Application.id == application_id, Application.task_id == task_id)
-    ).first()
-    if not application:
-        raise HTTPException(status_code=404, detail="Заявка не найдена")
-
-    if application.status != ApplicationStatus.PENDING:
-        raise HTTPException(status_code=400, detail="Заявка уже обработана")
-
-    # Обновляем задачу
-    task.status = TaskStatus.IN_PROGRESS
-    task.freelancer_id = application.freelancer_id
-
-    # Обновляем статус заявки
-    application.status = ApplicationStatus.ACCEPTED
-
-    # Отклоняем остальные заявки
-    other_applications = db.query(Application).filter(
-        and_(Application.task_id == task_id, Application.id != application_id)
-    ).all()
-    for app in other_applications:
-        app.status = ApplicationStatus.REJECTED
-
-    db.commit()
-    db.refresh(task)
-
-    return TaskResponse.model_validate(task.__dict__)
 
 # Отклонить заявку на задачу (для заказчиков)
 @router.post("/{task_id}/applications/{application_id}/reject", response_model=ApplicationResponse)
@@ -258,6 +264,39 @@ async def reject_application(
     db.refresh(application)
 
     return ApplicationResponse.model_validate(application.__dict__)
+
+# Отменить заявку на задачу (для фрилансеров)
+@router.post("/{task_id}/applications/cancel", status_code=status.HTTP_204_NO_CONTENT)
+async def cancel_application(
+    task_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if current_user.user_type != UserType.FREELANCER:
+        raise HTTPException(status_code=403, detail="Только фрилансеры могут отменять свои заявки")
+
+    # Проверяем, существует ли задача
+    task = db.query(Task).filter(Task.id == task_id).first()
+    if not task:
+        raise HTTPException(status_code=404, detail="Задача не найдена")
+
+    # Ищем заявку фрилансера
+    application = db.query(Application).filter(
+        and_(
+            Application.task_id == task_id,
+            Application.freelancer_id == current_user.id,
+            Application.status == ApplicationStatus.PENDING
+        )
+    ).first()
+
+    if not application:
+        raise HTTPException(status_code=404, detail="Заявка не найдена или уже обработана")
+
+    # Удаляем заявку
+    db.delete(application)
+    db.commit()
+
+    return {"message": "Заявка успешно отменена"}
 
 # Обновить задачу по ID
 @router.put("/{task_id}/update", response_model=TaskResponse)

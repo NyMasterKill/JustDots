@@ -11,6 +11,7 @@ import os
 from pathlib import Path
 from sqlalchemy.exc import IntegrityError
 from psycopg.errors import UniqueViolation
+from sqlalchemy import delete
 
 
 
@@ -45,11 +46,28 @@ async def update_profile(
     if profile_data.bio is not None:
         profile.bio = profile_data.bio
 
-    # Обновление skills и portfolio (пока не реализовано полностью)
-    if profile_data.skills:
-        pass
-    if profile_data.portfolio:
-        pass
+    # Обновление skills
+    if profile_data.skills is not None:
+        # Удаляем старые навыки
+        db.execute(delete(Skill).where(Skill.user_id == current_user.id))
+        # Добавляем новые навыки
+        for skill_data in profile_data.skills:
+            skill = Skill(user_id=current_user.id, name=skill_data.name)
+            db.add(skill)
+
+    # Обновление portfolio
+    if profile_data.portfolio is not None:
+        # Удаляем старое портфолио
+        db.execute(delete(Portfolio).where(Portfolio.user_id == current_user.id))
+        # Добавляем новое портфолио
+        for portfolio_data in profile_data.portfolio:
+            portfolio = Portfolio(
+                user_id=current_user.id,
+                title=portfolio_data.title,
+                description=portfolio_data.description,
+                url=portfolio_data.url
+            )
+            db.add(portfolio)
 
     try:
         db.commit()

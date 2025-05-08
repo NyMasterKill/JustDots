@@ -142,9 +142,9 @@ async def refresh_access_token(response: Response, refresh_token: str | None = C
         key="refresh_token",
         value=new_refresh_token,
         httponly=True,
-        secure=False,  # Для localhost в разработке
+        secure=False,  
         samesite="strict",
-        max_age=7 * 24 * 60 * 60  # 7 дней
+        max_age=7 * 24 * 60 * 60  
     )
     
     return {"access_token": new_access_token, "token_type": "bearer"}
