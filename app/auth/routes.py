@@ -197,5 +197,6 @@ async def get_current_user_info(current_user: User = Depends(get_current_user), 
         created_at=current_user.created_at.isoformat() if current_user.created_at else None,
         profile=profile_data,
         skills=current_user.skills,
-        completed_tasks_count=completed_tasks_count
+        completed_tasks_count=completed_tasks_count,
+        rating = current_user.rating
     )

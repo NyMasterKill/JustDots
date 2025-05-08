@@ -20,7 +20,6 @@ class User(Base):
     user_type = Column(Enum(UserType), nullable=False)
     rating = Column(Float, nullable=True)
     created_at = Column(DateTime, default=func.now())
-
     profile = relationship("Profile", back_populates="user", uselist=False)
 
 class BlacklistedToken(Base):

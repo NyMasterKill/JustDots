@@ -66,7 +66,13 @@ async def create_review(
     if not reviewer:
         raise HTTPException(status_code=404, detail="Пользователь для отзыва не найден")
 
+    # Обновляем рейтинг в users.rating
     reviewer.rating = average_rating
+
+    # Обновляем рейтинг в profile.rating
+    if reviewer.profile:
+        reviewer.profile.rating = average_rating
+
     db.commit()
 
     return ReviewResponse.model_validate(new_review)
