@@ -9,9 +9,9 @@ class TaskStatus(enum.Enum):
     CLOSED = "Закрытая"
 
 class TaskSkillLevel(enum.Enum):
-    BASIC = "Базовый"
-    MEDIUM = "Средний"
-    ADVANCED = "Продвинутый"
+    BASIC = "Менее года"
+    MEDIUM = "От 1 до 3 лет"
+    ADVANCED = "Более 3 лет"
 
 class TaskCategory(enum.Enum):
     DEVELOPMENT = "Разработка"
