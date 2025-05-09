@@ -16,6 +16,9 @@ from sqlalchemy import delete
 
 router = APIRouter()
 
+UPLOAD_DIR = Path("uploads/avatars")
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+
 @router.put("/profile/update", response_model=UserResponse)
 async def update_profile(
     profile_data: ProfileUpdate,

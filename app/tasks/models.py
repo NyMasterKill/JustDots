@@ -69,3 +69,4 @@ class Application(Base):
         default=ApplicationStatus.PENDING.value,
         nullable=False
     )
+    

@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, ForeignKey, String, Float, Text
 from sqlalchemy.orm import relationship
 from ..database import Base
 
+
 class Profile(Base):
     __tablename__ = "profiles"
     id = Column(Integer, primary_key=True, index=True)

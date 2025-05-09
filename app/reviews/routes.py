@@ -39,8 +39,8 @@ async def create_review(
 
     # 4. Проверяем, не был ли уже оставлен отзыв по этой задаче
     existing_review = db.query(Review).filter(
-        Review.user_id == current_user.id,
-        Review.reviewer_id == reviewer_id,
+        Review.user_id == reviewer_id,  # Кому оставляют отзыв
+        Review.reviewer_id == current_user.id,  # Кто оставляет отзыв
         Review.task_id == task_id
     ).first()
 
@@ -73,6 +73,7 @@ async def create_review(
         reviewer.profile.rating = average_rating
 
     db.commit()
+    return new_review
 
 @router.get("/user/{user_id}", response_model=list[ReviewResponse])
 async def get_reviews_by_user(

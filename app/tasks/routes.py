@@ -199,6 +199,51 @@ async def apply_for_task(
 
     return ApplicationResponse.model_validate(new_application.__dict__)
 
+@router.post("/{task_id}/applications/{application_id}/accept", response_model=TaskResponse)
+async def accept_application(
+        task_id: int,
+        application_id: int,
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_user)
+):
+    if current_user.user_type != UserType.CUSTOMER:
+        raise HTTPException(status_code=403, detail="Только заказчики могут принимать заявки")
+
+    task = db.query(Task).filter(Task.id == task_id, Task.owner_id == current_user.id).first()
+    if not task:
+        raise HTTPException(status_code=404, detail="Задача не найдена")
+
+    if task.status != TaskStatus.OPEN:
+        raise HTTPException(status_code=400, detail="Задача уже в процессе или закрыта")
+
+    application = db.query(Application).filter(
+        and_(Application.id == application_id, Application.task_id == task_id)
+    ).first()
+    if not application:
+        raise HTTPException(status_code=404, detail="Заявка не найдена")
+
+    if application.status != ApplicationStatus.PENDING:
+        raise HTTPException(status_code=400, detail="Заявка уже обработана")
+
+    # Обновляем задачу
+    task.status = TaskStatus.IN_PROGRESS
+    task.freelancer_id = application.freelancer_id
+
+    # Обновляем статус заявки
+    application.status = ApplicationStatus.ACCEPTED
+
+    # Отклоняем остальные заявки
+    other_applications = db.query(Application).filter(
+        and_(Application.task_id == task_id, Application.id != application_id)
+    ).all()
+    for app in other_applications:
+        app.status = ApplicationStatus.REJECTED
+
+    db.commit()
+    db.refresh(task)
+
+    return TaskResponse.model_validate(task.__dict__)
+
 # Получить список заявок на задачу (для заказчиков)
 @router.get("/{task_id}/applications", response_model=List[ApplicationResponse])
 async def get_task_applications(
@@ -231,9 +276,6 @@ async def get_task_applications(
         raise HTTPException(status_code=403, detail="Недопустимый тип пользователя")
 
     return [ApplicationResponse.model_validate(app.__dict__) for app in applications]
-
-# Получить все заявки фрилансера (без указания task_id)
-
 
 # Отклонить заявку на задачу (для заказчиков)
 @router.post("/{task_id}/applications/{application_id}/reject", response_model=ApplicationResponse)
