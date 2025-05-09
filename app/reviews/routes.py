@@ -39,8 +39,8 @@ async def create_review(
 
     # 4. Проверяем, не был ли уже оставлен отзыв по этой задаче
     existing_review = db.query(Review).filter(
-        Review.user_id == reviewer_id,  # Кому оставляют отзыв
-        Review.reviewer_id == current_user.id,  # Кто оставляет отзыв
+        Review.user_id == current_user.id,
+        Review.reviewer_id == reviewer_id,
         Review.task_id == task_id
     ).first()
 
