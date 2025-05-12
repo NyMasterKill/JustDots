@@ -63,6 +63,75 @@ async def create_task(
 
     return TaskResponse.model_validate(new_task.__dict__)
 
+#Просмотр списка задач со статусом "На рассмотрение модерацией"
+@router.get("/pending-moderation", response_model=List[TaskResponse])
+async def get_pending_moderation_tasks(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(10, ge=1, le=100)
+):
+    if current_user.user_type != UserType.MODERATOR:
+        raise HTTPException(status_code=403, detail="Доступ запрещён: требуется роль модератора")
+
+    tasks = db.query(Task).filter(Task.status == TaskStatus.PENDING_MODERATION).offset(skip).limit(limit).all()
+
+    return [TaskResponse.model_validate(task.__dict__) for task in tasks]
+#Перевод задачи в открытую модератором
+@router.post("/{task_id}/moderate/approve", response_model=TaskResponse)
+async def approve_task_by_moderator(
+    task_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Роут для модератора — принимает задачу, переводит её в статус "Открытая".
+    """
+    if current_user.user_type != UserType.MODERATOR:
+        raise HTTPException(status_code=403, detail="Только модератор может одобрять задачи")
+
+    task = db.query(Task).filter(Task.id == task_id).first()
+    if not task:
+        raise HTTPException(status_code=404, detail="Задача не найдена")
+
+    if task.status != TaskStatus.PENDING_MODERATION:
+        raise HTTPException(status_code=400, detail="Можно одобрить только задачу на рассмотрении")
+
+    task.status = TaskStatus.OPEN
+    db.commit()
+    db.refresh(task)
+
+    return TaskResponse.model_validate(task.__dict__)
+#Перевод задачи в отклоннёную модератором
+@router.post("/{task_id}/moderate/reject", response_model=TaskResponse)
+async def reject_task_by_moderator(
+    task_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Роут для модератора — отклоняет задачу, переводит её в статус "Отклонена модерацией".
+    Можно отклонить только задачу со статусом 'На рассмотрении модерацией'.
+    """
+    if current_user.user_type != UserType.MODERATOR:
+        raise HTTPException(status_code=403, detail="Только модератор может отклонять задачи")
+
+    task = db.query(Task).filter(Task.id == task_id).first()
+    if not task:
+        raise HTTPException(status_code=404, detail="Задача не найдена")
+
+    if task.status != TaskStatus.PENDING_MODERATION:
+        raise HTTPException(
+            status_code=400,
+            detail="Нельзя отклонить задачу, которая уже была одобрена или закрыта"
+        )
+
+    task.status = TaskStatus.REJECTED_BY_MODERATION
+    db.commit()
+    db.refresh(task)
+
+    return TaskResponse.model_validate(task.__dict__)
+
 # Получить все свои задачи (для заказчиков)
 @router.get("/", response_model=List[TaskResponse])
 async def get_my_tasks(

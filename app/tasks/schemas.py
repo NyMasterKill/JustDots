@@ -4,6 +4,8 @@ from enum import Enum
 from datetime import datetime
 
 class TaskStatus(str, Enum):
+    PENDING_MODERATION = "На рассмотрении модерацией"
+    REJECTED_BY_MODERATION = "Отклонена модерацией"
     OPEN = "Открытая"
     IN_PROGRESS = "В процессе"
     CLOSED = "Закрытая"

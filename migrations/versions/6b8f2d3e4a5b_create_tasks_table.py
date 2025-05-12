@@ -25,7 +25,7 @@ def upgrade() -> None:
         sa.Column('category', sa.Enum('Разработка', 'Дизайн', 'Программирование', 'Копирайтинг', 'Другое', name='taskcategory'), nullable=False),
         sa.Column('custom_category', sa.String(length=255), nullable=True),
         sa.Column('skill_level', sa.Enum('Менее года', 'От 1 до 3 лет', 'Более 3 лет', name='taskskilllevel'), nullable=False),
-        sa.Column('status', sa.Enum('Открытая', 'В процессе', 'Закрытая', name='taskstatus'), nullable=False, server_default=TaskStatus.OPEN.value),
+        sa.Column('status', sa.Enum("На рассмотрении модерацией", "Отклонена модерацией", 'Открытая', 'В процессе', 'Закрытая', name='taskstatus'), nullable=False, server_default=TaskStatus.PENDING_MODERATION.value),
         sa.Column('owner_id', sa.Integer(), nullable=False),
         sa.ForeignKeyConstraint(['owner_id'], ['users.id']),
         sa.PrimaryKeyConstraint('id')

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, validator
+from pydantic import BaseModel, EmailStr, validator, model_validator
 from .models import UserType
 from typing import Optional
 from ..users.schemas import Profile, Skill
@@ -39,6 +39,8 @@ class UserResponse(BaseModel):
     patronymic: str | None
     email: EmailStr
     user_type: str
+    is_banned: bool
+    ban_expires_at: str | None
     created_at: str | None
     profile: Profile | None
     skills: list[Skill] = []
@@ -62,3 +64,27 @@ class UserLogin(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
+
+class ChangeUserRoleRequest1(BaseModel):
+    user_id: int
+    new_role: UserType  # Это тот же enum, что и в models.UserType
+
+    @model_validator(mode='after')
+    def prevent_moderator_role(self):
+        if self.new_role == UserType.MODERATOR:
+            raise ValueError("Нельзя назначить роль модератора через этот эндпоинт")
+        return self
+
+class ChangeUserRoleRequest2(BaseModel):
+    user_id: int
+    new_role: UserType
+
+class BanUserRequest(BaseModel):
+    user_id: int
+    duration_days: int | None = None
+    until: datetime | None = None
+    @model_validator(mode='after')
+    def check_duration_or_until(self):
+        if self.duration_days is None and self.until is None:
+            raise ValueError("Необходимо указать либо duration_days, либо until")
+        return self

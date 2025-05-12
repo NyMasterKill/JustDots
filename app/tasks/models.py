@@ -4,6 +4,8 @@ from ..database import Base
 import enum
 
 class TaskStatus(enum.Enum):
+    PENDING_MODERATION = "На рассмотрении модерацией"
+    REJECTED_BY_MODERATION = "Отклонена модерацией"
     OPEN = "Открытая"
     IN_PROGRESS = "В процессе"
     CLOSED = "Закрытая"
@@ -44,7 +46,7 @@ class Task(Base):
     )
     status = Column(
         SQLAlchemyEnum(TaskStatus, values_callable=lambda x: enum_values(TaskStatus)),
-        default=TaskStatus.OPEN.value,
+        default=TaskStatus.PENDING_MODERATION.value,
         nullable=False
     )
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
