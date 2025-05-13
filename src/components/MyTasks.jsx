@@ -68,7 +68,7 @@ export const MyTasks = () => {
             <div className="blocktitle">мои заказы</div>
             <div className="bodyblock gap10">
                 {tasks.map((task) => (
-                    <Task key={task.id} taskid={task.id} />
+                    <Task key={task.id} task={task} />
                 ))}
             </div>
         </>

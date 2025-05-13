@@ -56,7 +56,7 @@ export const PublicTasks = () => {
             <div className="blocktitle">лента заказов</div>
             <div className="bodyblock gap10">
                 {tasks.map((task) => (
-                    <Task key={task.id} taskid={task.id} />
+                    <Task key={task.id} taskid={task} />
                 ))}
             </div>
         </>

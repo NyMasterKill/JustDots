@@ -9,11 +9,10 @@ import { useNotification } from '../../context/Notifications.jsx';
 import ratingstar from '../../assets/ICONS/RATINGSTAR.svg';
 import {getAppCounter} from "../../utils/AppCounter.jsx";
 
-export const Task = ({ taskid }) => {
+export const Task = ({ task }) => {
     const navigate = useNavigate();
     const { myuser } = useContext(AuthContext);
     const [loading, setLoading] = useState(true);
-    const [task, setTask] = useState(1);
     const [isDeleting, setIsDeleting] = useState(false);
     const [taskOwner, setTaskOwner] = useState({});
     const [taskFreelancer, setTaskFreelancer] = useState({});
@@ -23,23 +22,19 @@ export const Task = ({ taskid }) => {
 
     useEffect(() => {
         const handleTaskFetch = async () => {
-            if (!myuser) return;
-            const currentroute = myuser.user_type === "customer" ? `/tasks/tasks/${taskid}` : `/tasks/tasks/${taskid}/public`;
+            if (!task) return;
             try {
-                const taskResponse = await api.get(currentroute);
-                setTask(taskResponse.data);
-
-                if (taskResponse.data.owner_id) {
-                    const ownerResponse = await api.get(`/users/profile/${taskResponse.data.owner_id}`);
+                if (task.owner_id) {
+                    const ownerResponse = await api.get(`/users/profile/${task.owner_id}`);
                     setTaskOwner(ownerResponse.data);
                 }
 
-                if (taskResponse.data.freelancer_id) {
-                    const freelancerResponse = await api.get(`/users/profile/${taskResponse.data.freelancer_id}`);
+                if (task.freelancer_id) {
+                    const freelancerResponse = await api.get(`/users/profile/${task.freelancer_id}`);
                     setTaskFreelancer(freelancerResponse.data);
                 }
 
-                const count = await getAppCounter(taskResponse.data.id);
+                const count = await getAppCounter(task.id);
                 setApps(count);
             } catch (error) {
                 setErr(error);
@@ -50,7 +45,7 @@ export const Task = ({ taskid }) => {
             }
         };
         handleTaskFetch();
-    }, [taskid]);
+    }, [task]);
 
 
     const handleTaskDelete = async () => {
