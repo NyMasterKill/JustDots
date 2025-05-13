@@ -75,130 +75,120 @@ export const Task = ({ taskid }) => {
     const { diffresult, dayText, status } = CalcMinusDater(task.deadline);
 
     return (
-        <>
-            <div style={task.status == "Закрытая" ? { opacity: 0.5 } : { opacity: 1 }} className={isDeleting ? "bodyblock fxrow deleting" : "bodyblock fxrow"}>
-                <div className="taskblock">
-                    <div className="taskblock-title">
-                        {task.title}
-                    </div>
-                    <div className="taskblock-info">
-                        <div className="taskblock-infoprops">
-                            <div className="propblock accent">
-                                {task.category}
-                            </div>
-                            <div className="propblock">
-                                {task.skill_level}
-                            </div>
-                            {task.status == "Открытая" ? (
-                                <div className={status ? "propblock black" : "propblock red"}>
-                                    {diffresult} {dayText}
-                                </div>
-                            ) : task.status == "В процессе" ? (
-                                <div className={status ? "propblock black" : "propblock red"}>
-                                    {diffresult} {dayText}
-                                </div>
-                            ) : null}
-                        </div>
-                        <div className="taskblock-price">
-                            {task.budget_max !== task.budget_min ? (
-                                <>
-                                    {task.budget_min} - {task.budget_max}
-                                    < img style={{ height: 22 + "px" }} src={rubleicon}></img>
-                                    <span style={{ fontSize: 17 + "px", paddingTop: 5 + "px" }}>за заказ</span>
-                                </>
-                            ) : (
-                                <>
-                                    {task.budget_max}
-                                    < img style={{ height: 22 + "px" }} src={rubleicon}></img>
-                                    <span style={{ fontSize: 17 + "px", paddingTop: 5 + "px" }}>за заказ</span>
-                                </>
-                            )}
-
-                        </div>
-                        <div className="tblbottom">
-                            <div className={task.status == "Открытая" ? "propblock" : task.status == "В процессе" ? "propblock" : "propblock black"}>
-                                {
-                                    task.status == "Закрытая" ? (
-                                        <span style={{ color: "white", fontSize: 14 + "px", fontWeight: 800 }}>{task.status}</span>
-                                    ) : task.status == "В процессе" ? (
-                                        <>
-                                            <span style={{ color: "black", fontSize: 14 + "px", fontWeight: 800 }}>{task.status}</span>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <div style={{ width: 10 + "px", height: 10 + "px", background: "limegreen" }} className="ellipse"></div>
-                                            <span style={{ color: "limegreen", fontSize: 14 + "px", fontWeight: 800 }}>{task.status}</span>
-                                        </>
-                                    )
-                                }
-                            </div>
-                        </div>
-                    </div>
-                    <div className="taskblock-attr">
-
-                    </div>
+        <div style={task.status == "Закрытая" ? { opacity: 0.5 } : { opacity: 1 }} className={isDeleting ? "bodyblock fxrow deleting" : "bodyblock fxrow"}>
+            <div className="taskblock">
+                <div className="taskblock-title">
+                    {task.title}
                 </div>
-                <div className="taskblock">
-                    {myuser.user_type == "customer" ? (
-                        <div className="tbtop">
-                            {task.status === "Открытая" && appcounter == 0 ? (
-                                <SimpleButton style="red" icon="x" onClick={handleTaskDelete} disabled={isDeleting}>Удалить заказ</SimpleButton>
-                            ) : task.status === "Открытая" && appcounter > 0 ? (
-                                null
-                            ) : task.status === "В процессе" ? (
-                                <>
-                                    Работает фрилансер
-                                    <Link style={{ textDecoration: "none", color: "var(--variable-collection-accent)" }} to={"/profile/" + taskFreelancer.id}>
-                                        <div className="task-freelancerlink">
-                                            <b>
-                                                {" " + taskFreelancer.username}
-                                            </b>
-                                        </div>
-                                    </Link>
-                                </>
-                            ) : (
-                                <>
-                                    Заказ выполнил фрилансер
-                                    <Link style={{ textDecoration: "none", color: "var(--variable-collection-accent)" }} to={"/profile/" + taskFreelancer.id}>
-                                        <div className="task-freelancerlink">
-                                            <b>
-                                                {" " + taskFreelancer.username}
-                                            </b>
-                                        </div>
-                                    </Link>
-                                </>
-                            )}
-
+                <div className="taskblock-info">
+                    <div className="taskblock-infoprops">
+                        <div className="propblock accent">
+                            {task.category}
                         </div>
-                    ) : (
-                        <div className="tbtop">
-                            <div className="propblock">
-                                {taskOwner?.username}
-                            </div>
-
-                            <div className="propblock black">
-                                <img src={ratingstar} alt="" />
-                                {taskOwner.profile?.rating || "0.0"}
-                            </div>
+                        <div className="propblock">
+                            {task.skill_level}
                         </div>
-                    )}
-
-                    <div className="tbbottom">
-                        {task.status == "Открытая" && myuser.user_type == "customer" ? (
-                            <SimpleButton
-                                style={appcounter > 0 ? "white butcounter" : "white"}
-                                data-count={appcounter}
-                            >
-                                Заявки
-                            </SimpleButton>
+                        {task.status == "Открытая" || task.status == "В процессе" ? (
+                            <div className={status ? "propblock black" : "propblock red"}>
+                                {diffresult} {dayText}
+                            </div>
+                        ) : null}
+                    </div>
+                    <div className="taskblock-price">
+                        {task.budget_max !== task.budget_min ? (
+                            <>
+                                {task.budget_min} - {task.budget_max}
+                                < img style={{ height: 22 + "px" }} src={rubleicon}></img>
+                                <span style={{ fontSize: 17 + "px", paddingTop: 5 + "px" }}>за заказ</span>
+                            </>
                         ) : (
-                            null
+                            <>
+                                {task.budget_max}
+                                < img style={{ height: 22 + "px" }} src={rubleicon}></img>
+                                <span style={{ fontSize: 17 + "px", paddingTop: 5 + "px" }}>за заказ</span>
+                            </>
                         )}
-                        <SimpleButton icon="search" iconColor="black" onClick={() => navigate(`/task/${task.id}`)}> Посмотреть заказ</SimpleButton>
+                    </div>
+                    <div className="tblbottom">
+                        <div className={task.status == "Открытая" ? "propblock" : task.status == "В процессе" ? "propblock" : "propblock black"}>
+                            {
+                                task.status == "Закрытая" ? (
+                                    <span style={{ color: "white", fontSize: 14 + "px", fontWeight: 800 }}>{task.status}</span>
+                                ) : task.status == "В процессе" ? (
+                                    <>
+                                        <span style={{ color: "black", fontSize: 14 + "px", fontWeight: 800 }}>{task.status}</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div style={{ width: 10 + "px", height: 10 + "px", background: "limegreen" }} className="ellipse"></div>
+                                        <span style={{ color: "limegreen", fontSize: 14 + "px", fontWeight: 800 }}>{task.status}</span>
+                                    </>
+                                )
+                            }
+                        </div>
                     </div>
                 </div>
-            </div >
-        </>
+            </div>
+            <div className="taskblock">
+                {myuser.id == taskOwner.id ? (
+                    <div className="tbtop">
+                        {task.status === "Открытая" && appcounter == 0 ? (
+                            <SimpleButton style="red" icon="x" onClick={handleTaskDelete} disabled={isDeleting}>Удалить заказ</SimpleButton>
+                        ) : task.status === "Открытая" && appcounter > 0 ? (
+                            null
+                        ) : task.status === "В процессе" ? (
+                            <>
+                                Работает фрилансер
+                                <Link style={{ textDecoration: "none", color: "var(--variable-collection-accent)" }} to={"/profile/" + taskFreelancer.id}>
+                                    <div className="task-freelancerlink">
+                                        <b>
+                                            {" " + taskFreelancer.username}
+                                        </b>
+                                    </div>
+                                </Link>
+                            </>
+                        ) : (
+                            <>
+                                Заказ выполнил фрилансер
+                                <Link style={{ textDecoration: "none", color: "var(--variable-collection-accent)" }} to={"/profile/" + taskFreelancer.id}>
+                                    <div className="task-freelancerlink">
+                                        <b>
+                                            {" " + taskFreelancer.username}
+                                        </b>
+                                    </div>
+                                </Link>
+                            </>
+                        )}
+
+                    </div>
+                ) : (
+                    <div className="tbtop">
+                        <div className="propblock">{taskOwner?.username}</div>
+                        <div className="propblock black">
+                            <img src={ratingstar} alt="" />
+                            {taskOwner.profile?.rating || "0.0"}
+                        </div>
+                    </div>
+                )}
+                <div className="tbbottom">
+                    {task.status == "Открытая" && myuser.user_type == "customer" ? (
+                        <SimpleButton
+                            style={appcounter > 0 ? "white butcounter" : "white"}
+                            data-count={appcounter}
+                        >
+                            Заявки
+                        </SimpleButton>
+                    ) : null}
+                    <SimpleButton
+                        icon="search"
+                        iconColor="black"
+                        onClick={() => navigate(`/task/${task.id}`)}
+                    >
+                        Посмотреть заказ
+                    </SimpleButton>
+                </div>
+            </div>
+        </div >
     )
 }
 

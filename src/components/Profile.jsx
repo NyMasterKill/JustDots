@@ -1,18 +1,14 @@
 import { useState, useEffect, useContext } from 'react';
 import { useNotification } from '../context/Notifications.jsx';
-import { Navigate, useParams } from 'react-router-dom';
-import exampleimage from '../assets/UI/photoexample.jpg'
+import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import Loader from './Loader.jsx';
 import { AuthContext } from '../context/AuthContext.jsx';
 import ratingstar from '../assets/ICONS/RATINGSTAR.svg'
 import simpleuser from '../assets/ICONS/SIMPLEUSER.svg'
 import timestamp from '../assets/ICONS/TIMESTAMP.svg'
-import { useNavigate } from 'react-router-dom';
-import SimpleHatButton from '../components/SimpleHatButton.jsx';
 import SimpleButton from './SimpleButton.jsx';
 import { CalcDater } from '../utils/CalcDater.jsx';
-import Modal from './Modal.jsx';
 import { SERVER_URL } from '../pathconfig.js';
 
 const Profile = () => {

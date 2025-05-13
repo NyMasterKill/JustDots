@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext, useRef } from "react";
+import { useEffect, useState } from "react";
 import { AuthContext } from '../../context/AuthContext.jsx';
 import api from '../../services/api';
 import { SERVER_URL } from "../../pathconfig.js";
@@ -6,11 +6,14 @@ import MiniProfile from "./MiniProfile.jsx";
 import { Link } from "react-router-dom";
 import SimpleButton from "../SimpleButton.jsx";
 import SimpleHatButton from "../SimpleHatButton.jsx";
+import rubleicon from "../../assets/ICONS/RUBLE.svg";
+import {useNotification} from "../../context/Notifications.jsx";
 
 export const Feedback = ({ taskid }) => {
     const [feedbacks, setFeedbacks] = useState([]);
+    const notify = useNotification();
 
-    const feedbacksFetcher = async () => {
+    const feedbackFetcher = async () => {
         if (!taskid) return;
         try {
             const response = await api.get(`/tasks/tasks/${taskid}/applications`);
@@ -23,7 +26,7 @@ export const Feedback = ({ taskid }) => {
     }
 
     useEffect(() => {
-        feedbacksFetcher();
+        feedbackFetcher();
     }, [taskid])
 
     const feedbackAccept = async (id) => {
@@ -31,20 +34,47 @@ export const Feedback = ({ taskid }) => {
         try {
             const response = await api.post(`/tasks/tasks/${taskid}/applications/${id}/accept`);
             console.log(response);
+            notify({message: `Вы передали заказ #${taskid} в работу`, type: "success", duration: 4200});
         }
         catch (error) {
             console.log(error);
+        }
+        finally {
+            feedbackFetcher();
+        }
+    }
+
+    const feedbackReject = async (id) => {
+        if (!id) return;
+        try {
+            const response = await api.post(`/tasks/tasks/${taskid}/applications/${id}/reject`);
+            console.log(response);
+        }
+        catch (error) {
+            console.log(error);
+        }
+        finally {
+            feedbackFetcher();
         }
     }
 
     return (
         <>
             {feedbacks.map((feedback) => (
-                <div key={feedback.id} className="bodyblock black">
-                    <div className="bodyblock bodyblockwp black gap10 fxrow">
-                        <Link to={`/profile/` + feedback.freelancer_id}><MiniProfile id={feedback.freelancer_id}></MiniProfile></Link>
-                        <SimpleHatButton onClick={() => feedbackAccept(feedback.id)}>+</SimpleHatButton>
-                        <SimpleHatButton>-</SimpleHatButton>
+                <div key={feedback.id} className="feedbackblock">
+                    <Link style={{ textDecoration: "none" }} to={`/profile/` + feedback.freelancer_id}>
+                        <MiniProfile id={feedback.freelancer_id}/>
+                    </Link>
+                    <div className="bodyblock feedbackcom">
+                        {feedback.comment}
+                    </div>
+                    <div className="feedbackint filler">
+                        <div className="propblock fbp">
+                            {feedback.proposed_price}
+                            <img src={rubleicon} style={{height: 20 + "px"}} />
+                        </div>
+                        <SimpleButton style="accent" onClick={() => feedbackAccept(feedback.id)}>Принять</SimpleButton>
+                        <SimpleButton style="black"  onClick={() => feedbackReject(feedback.id)}>Отклонить</SimpleButton>
                     </div>
                 </div>
             ))}

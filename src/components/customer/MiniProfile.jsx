@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import api from "../../services/api";
 import { SERVER_URL } from "../../pathconfig";
+import ratingstar from "../../assets/ICONS/RATINGSTAR.svg";
 
 export const MiniProfile = ({ id }) => {
     const [profile, setProfile] = useState({});
 
     const profileFetcher = async () => {
         if (!id) return;
-
         try {
             const response = await api.get(`/users/profile/${id}`);
             setProfile(response.data);
@@ -33,6 +33,10 @@ export const MiniProfile = ({ id }) => {
                     ) : (
                         <div className="ellipse"> </div>
                     )}
+                </div>
+                <div className="propblock black">
+                    <img src={ratingstar}/>
+                    {profile.profile?.rating || 0.0}
                 </div>
             </div>
         </>

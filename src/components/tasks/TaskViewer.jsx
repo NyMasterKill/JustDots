@@ -168,59 +168,45 @@ export const TaskViewer = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="taskblock-attr">
-
-                        </div>
                     </div>
                     <div className="taskblock">
-                        {myuser.user_type == "customer" ? (
+                        {myuser.id == taskOwner.id ? (
                             <div className="tbtop">
                                 {task.status === "Открытая" && appcounter == 0 ? (
                                     <SimpleButton style="red" icon="x" onClick={handleTaskDelete}>Удалить заказ</SimpleButton>
-                                ) : task.status === "Открытая" && appcounter > 0 ? (
-                                    null
-                                ) : task.status === "В процессе" ? (
-                                    <>
-
-                                        <div className="task-freelancerlinkfull">
-                                            <span>В работе у</span>
-                                            <Link style={{ textDecoration: "none" }} to={"/profile/" + taskFreelancer.id}>
-                                                <div className="miniprofile">
-                                                    {taskFreelancer.username}
-                                                    <div className="miniprofile-avatar">
-                                                        {taskFreelancer?.profile?.avatar_url ? (
-                                                            <img src={SERVER_URL + (taskFreelancer.profile?.avatar_url || null)}></img>
-                                                        ) : (
-                                                            <div></div>
-                                                        )}
-                                                    </div>
+                                ) : task.status === "Открытая" && appcounter > 0 ? null : task.status === "В процессе" ? (
+                                    <div className="task-freelancerlinkfull">
+                                        <span>В работе у</span>
+                                        <Link style={{ textDecoration: "none" }} to={"/profile/" + taskFreelancer.id}>
+                                            <div className="miniprofile">
+                                                {taskFreelancer.username}
+                                                <div className="miniprofile-avatar">
+                                                    {taskFreelancer?.profile?.avatar_url ? (
+                                                        <img src={SERVER_URL + (taskFreelancer.profile?.avatar_url || null)}></img>
+                                                    ) : (
+                                                        <div></div>
+                                                    )}
                                                 </div>
-                                            </Link>
-                                        </div>
-
-                                    </>
+                                            </div>
+                                        </Link>
+                                    </div>
                                 ) : (
-                                    <>
-
-                                        <div className="task-freelancerlinkfull">
-                                            <span>Заказ выполнил</span>
-                                            <Link style={{ textDecoration: "none" }} to={"/profile/" + taskFreelancer.id}>
-                                                <div className="miniprofile">
-                                                    {taskFreelancer.username}
-                                                    <div className="miniprofile-avatar">
-                                                        {taskFreelancer?.profile?.avatar_url ? (
-                                                            <img src={SERVER_URL + (taskFreelancer?.profile?.avatar_url || null)}></img>
-                                                        ) : (
-                                                            <div></div>
-                                                        )}
-                                                    </div>
+                                    <div className="task-freelancerlinkfull">
+                                        <span>Заказ выполнил</span>
+                                        <Link style={{ textDecoration: "none" }} to={"/profile/" + taskFreelancer.id}>
+                                            <div className="miniprofile">
+                                                {taskFreelancer.username}
+                                                <div className="miniprofile-avatar">
+                                                    {taskFreelancer?.profile?.avatar_url ? (
+                                                        <img src={SERVER_URL + (taskFreelancer?.profile?.avatar_url || null)}></img>
+                                                    ) : (
+                                                        <div></div>
+                                                    )}
                                                 </div>
-                                            </Link>
-                                        </div>
-
-                                    </>
+                                            </div>
+                                        </Link>
+                                    </div>
                                 )}
-
                             </div>
                         ) : (
                             <div className="tbtop">
@@ -265,9 +251,9 @@ export const TaskViewer = () => {
                     </div>
 
                 </div>
-
-            <FeedbacksViewer task={task} user={myuser.user_type}></FeedbacksViewer>
-
+                {task.status == "Открытая" ? (
+                    <FeedbacksViewer task={task} user={myuser.user_type}></FeedbacksViewer>
+                ) : null}
             </div >
         </>
     )
