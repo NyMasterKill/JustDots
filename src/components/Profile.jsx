@@ -127,7 +127,11 @@ const Profile = () => {
                                     <div className='propblock black'>
                                         Заказчик
                                     </div>
-                                ) : (
+                                ) : profile.user_type == "moderator" ?(
+                                    <div className='propblock accent'>
+                                        Модератор
+                                    </div>
+                                ):(
                                     <div className='propblock'>
                                         Исполнитель
                                     </div>

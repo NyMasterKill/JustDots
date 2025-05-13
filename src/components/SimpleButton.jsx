@@ -5,6 +5,7 @@ import SupportIcon from "../assets/ICONS/SUPPORT.svg?react"
 import ArbitrageIcon from "../assets/ICONS/ARBITRAGE.svg?react"
 import BackcIcon from "../assets/ICONS/BACKCIRCLE.svg?react"
 import CheckIcon from "../assets/ICONS/INSPECT.svg?react"
+import OrdersIcon from "../assets/ICONS/ORDERS.svg?react"
 
 export const SimpleButton = ({ icon, iconColor, style, children, ...props }) => {
     const className = style ? `simple-button-${style}` : 'simple-button-white';
@@ -16,6 +17,7 @@ export const SimpleButton = ({ icon, iconColor, style, children, ...props }) => 
         arbitrage: ArbitrageIcon,
         backc: BackcIcon,
         check: CheckIcon,
+        order: OrdersIcon,
     }
 
     const IconComponent = icon ? icons[icon] : null;

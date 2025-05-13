@@ -33,21 +33,20 @@ const Navbar = () => {
                             <>  {/* ШАПКА ПРИ АВТОРИЗАЦИИ */}
                                 <div className='hat-interactive-menu-act'>
                                     {myuser.user_type == "freelancer" ? (
-                                        <Link to="/orders">
+                                        <Link style={{textDecoration: "none"}} to="/orders">
                                             <SimpleButton icon="search">Лента заказов</SimpleButton>
                                         </Link>
                                     ) : (
-                                        <Link to="/create">
+                                        <Link style={{textDecoration: "none"}} to="/create">
                                             <SimpleButton style="black" icon="plus">Создать заказ</SimpleButton>
                                         </Link>
                                     )}
                                     <SimpleButton icon="arbitrage">Арбитраж</SimpleButton>
                                     <SimpleButton style="accent" icon="support">Техн. поддержка</SimpleButton>
                                 </div>
-                                <Link to={"/mytasks"}>
-                                    <SimpleHatButton icon="order">Мои заказы</SimpleHatButton>
+                                <Link style={{textDecoration: "none"}} to={"/mytasks"}>
+                                    <SimpleButton icon="order" title="Мои заказы">Мои заказы</SimpleButton>
                                 </Link>
-                                <SimpleHatButton></SimpleHatButton>
                                 <SimpleHatButton icon="messages">Сообщения</SimpleHatButton>
                                 <Link style={{ textDecoration: 'none' }} to={"/profile/" + myuser.id} title='Мой профиль'>
                                     <div tabIndex={0} className='ellipse-profile miniep'>

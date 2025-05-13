@@ -150,80 +150,83 @@ export const TaskViewer = () => {
 
                             </div>
                             <div className="tblbottom">
-                                <div className={task.status == "Открытая" ? "propblock" : task.status == "В процессе" ? "propblock" : "propblock black"}>
-                                    {
-                                        task.status == "Закрытая" ? (
-                                            <span style={{ color: "white", fontSize: 14 + "px", fontWeight: 800 }}>{task.status}</span>
-                                        ) : task.status == "В процессе" ? (
-                                            <>
-                                                <span style={{ color: "black", fontSize: 14 + "px", fontWeight: 800 }}>{task.status}</span>
-                                            </>
+                                <div className={`propblock${task.status === "Закрытая" ? " black" : ""}`}>
+                                    {task.status === "Закрытая" ? (
+                                        <span style={{ color: "white", fontSize: "14px", fontWeight: 800 }}>{task.status}</span>
+                                    ) : task.status === "В процессе" ? (
+                                        <span style={{ color: "black", fontSize: "14px", fontWeight: 800 }}>{task.status}</span>
+                                    ) : task.status === "На рассмотрении модерацией" ? (
+                                        <>
+                                            <div
+                                                style={{
+                                                    width: "10px",
+                                                    height: "10px",
+                                                    background: "blue"
+                                                }}
+                                                className="ellipse"
+                                            />
+                                            <span style={{ color: "blue", fontSize: "14px", fontWeight: 800 }}>
+                                        {task.status}
+                                    </span>
+                                        </>
                                         ) : (
-                                            <>
-                                                <div style={{ width: 10 + "px", height: 10 + "px", background: "limegreen" }} className="ellipse"></div>
-                                                <span style={{ color: "limegreen", fontSize: 14 + "px", fontWeight: 800 }}>{task.status}</span>
-                                            </>
-                                        )
-                                    }
+                                        <>
+                                            <div
+                                                style={{
+                                                    width: "10px",
+                                                    height: "10px",
+                                                    background: "limegreen"
+                                                }}
+                                                className="ellipse"
+                                            />
+                                            <span style={{ color: "limegreen", fontSize: "14px", fontWeight: 800 }}>
+                                        {task.status}
+                                    </span>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div className="taskblock">
-                        {myuser.id == taskOwner.id ? (
+                        {myuser.id === taskOwner.id && task.status !== "На рассмотрении модерацией" ? (
                             <div className="tbtop">
-                                {task.status === "Открытая" && appcounter == 0 ? (
-                                    <SimpleButton style="red" icon="x" onClick={handleTaskDelete}>Удалить заказ</SimpleButton>
-                                ) : task.status === "Открытая" && appcounter > 0 ? null : task.status === "В процессе" ? (
-                                    <div className="task-freelancerlinkfull">
-                                        <span>В работе у</span>
-                                        <Link style={{ textDecoration: "none" }} to={"/profile/" + taskFreelancer.id}>
-                                            <div className="miniprofile">
-                                                {taskFreelancer.username}
-                                                <div className="miniprofile-avatar">
-                                                    {taskFreelancer?.profile?.avatar_url ? (
-                                                        <img src={SERVER_URL + (taskFreelancer.profile?.avatar_url || null)}></img>
-                                                    ) : (
-                                                        <div></div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </Link>
-                                    </div>
+                                {task.status === "Открытая" ? (
+                                    appcounter === 0 && (
+                                        <SimpleButton style="red" icon="x" onClick={handleTaskDelete}>
+                                            Удалить заказ
+                                        </SimpleButton>
+                                    )
                                 ) : (
                                     <div className="task-freelancerlinkfull">
-                                        <span>Заказ выполнил</span>
-                                        <Link style={{ textDecoration: "none" }} to={"/profile/" + taskFreelancer.id}>
+                                        <span>{task.status === "В процессе" ? "В работе у" : "Заказ выполнил"}</span>
+                                        <Link style={{ textDecoration: "none" }} to={`/profile/${taskFreelancer.id}`}>
                                             <div className="miniprofile">
                                                 {taskFreelancer.username}
                                                 <div className="miniprofile-avatar">
                                                     {taskFreelancer?.profile?.avatar_url ? (
-                                                        <img src={SERVER_URL + (taskFreelancer?.profile?.avatar_url || null)}></img>
-                                                    ) : (
-                                                        <div></div>
-                                                    )}
+                                                        <img src={`${SERVER_URL}${taskFreelancer.profile.avatar_url}`} alt="Аватар фрилансера" />
+                                                    ) : (<div/>)}
                                                 </div>
                                             </div>
                                         </Link>
                                     </div>
                                 )}
                             </div>
-                        ) : (
+                        ) : task.status !== "На рассмотрении модерацией" && (
                             <div className="tbtop">
                                 <div className="task-freelancerlinkfull">
                                     <span>Заказчик</span>
-                                    <Link style={{ textDecoration: "none" }} to={"/profile/" + taskOwner.id}>
+                                    <Link style={{ textDecoration: "none" }} to={`/profile/${taskOwner.id}`}>
                                         <div className="miniprofile">
                                             {taskOwner.username}
                                             <div className="miniprofile-avatar">
-                                                {taskOwner?.profile?.avatar_url ? (
-                                                    <img src={SERVER_URL + (taskOwner?.profile?.avatar_url || null)}></img>
-                                                ) : (
-                                                    <div></div>
+                                                {taskOwner?.profile?.avatar_url && (
+                                                    <img src={`${SERVER_URL}${taskOwner.profile.avatar_url}`} alt="Аватар заказчика" />
                                                 )}
                                             </div>
                                             <div className="propblock black">
-                                                <img src={ratingstar} alt="" />
+                                                <img src={ratingstar} alt="Рейтинг" />
                                                 {taskOwner.profile?.rating || "0.0"}
                                             </div>
                                         </div>

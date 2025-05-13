@@ -8,8 +8,6 @@ import { SimpleButton } from "../SimpleButton.jsx";
 import { useNotification } from '../../context/Notifications.jsx';
 import ratingstar from '../../assets/ICONS/RATINGSTAR.svg';
 import {getAppCounter} from "../../utils/AppCounter.jsx";
-import usericon from '../../assets/ICONS/USER.svg';
-import usersicon from '../../assets/ICONS/USERS.svg';
 
 export const Task = ({ taskid }) => {
     const navigate = useNavigate();
@@ -20,6 +18,7 @@ export const Task = ({ taskid }) => {
     const [taskOwner, setTaskOwner] = useState({});
     const [taskFreelancer, setTaskFreelancer] = useState({});
     const [appcounter, setApps] = useState(0);
+    const [err, setErr] = useState (null);
     const notify = useNotification();
 
     useEffect(() => {
@@ -43,6 +42,7 @@ export const Task = ({ taskid }) => {
                 const count = await getAppCounter(taskResponse.data.id);
                 setApps(count);
             } catch (error) {
+                setErr(error);
                 console.error('Ошибка при загрузке данных:', error);
                 notify({ message: "Ошибка при загрузке данных", type: "error", duration: 4200 });
             } finally {
@@ -67,6 +67,11 @@ export const Task = ({ taskid }) => {
     }
 
     if (loading) {
+        return (
+            <div style={{ fontSize: 40 + "px" }} className="bodyblock nlbb"></div>
+        )
+    }
+    if(err){
         return (
             <div style={{ fontSize: 40 + "px" }} className="bodyblock nlbb"></div>
         )
@@ -110,62 +115,77 @@ export const Task = ({ taskid }) => {
                         )}
                     </div>
                     <div className="tblbottom">
-                        <div className={task.status == "Открытая" ? "propblock" : task.status == "В процессе" ? "propblock" : "propblock black"}>
-                            {
-                                task.status == "Закрытая" ? (
-                                    <span style={{ color: "white", fontSize: 14 + "px", fontWeight: 800 }}>{task.status}</span>
-                                ) : task.status == "В процессе" ? (
-                                    <>
-                                        <span style={{ color: "black", fontSize: 14 + "px", fontWeight: 800 }}>{task.status}</span>
-                                    </>
-                                ) : (
-                                    <>
-                                        <div style={{ width: 10 + "px", height: 10 + "px", background: "limegreen" }} className="ellipse"></div>
-                                        <span style={{ color: "limegreen", fontSize: 14 + "px", fontWeight: 800 }}>{task.status}</span>
-                                    </>
-                                )
-                            }
+                        <div className={`propblock${task.status === "Закрытая" ? " black" : ""}`}>
+                            {task.status === "Закрытая" ? (
+                                <span style={{ color: "white", fontSize: "14px", fontWeight: 800 }}>{task.status}</span>
+                            ) : task.status === "В процессе" ? (
+                                <span style={{ color: "black", fontSize: "14px", fontWeight: 800 }}>{task.status}</span>
+                            ) : task.status === "На рассмотрении модерацией" ? (
+                                <>
+                                    <div
+                                        style={{
+                                            width: "10px",
+                                            height: "10px",
+                                            background: "blue"
+                                        }}
+                                        className="ellipse"
+                                    />
+                                    <span style={{ color: "blue", fontSize: "14px", fontWeight: 800 }}>
+                                        {task.status}
+                                    </span>
+                                </>
+                            ) : (
+                                <>
+                                    <div
+                                        style={{
+                                            width: "10px",
+                                            height: "10px",
+                                            background: "limegreen"
+                                        }}
+                                        className="ellipse"
+                                    />
+                                    <span style={{ color: "limegreen", fontSize: "14px", fontWeight: 800 }}>
+                                        {task.status}
+                                    </span>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>
             </div>
             <div className="taskblock">
-                {myuser.id == taskOwner.id ? (
+                {myuser.id === taskOwner.id && task.status !== "На рассмотрении модерацией" ? (
                     <div className="tbtop">
-                        {task.status === "Открытая" && appcounter == 0 ? (
-                            <SimpleButton style="red" icon="x" onClick={handleTaskDelete} disabled={isDeleting}>Удалить заказ</SimpleButton>
-                        ) : task.status === "Открытая" && appcounter > 0 ? (
-                            null
-                        ) : task.status === "В процессе" ? (
-                            <>
-                                Работает фрилансер
-                                <Link style={{ textDecoration: "none", color: "var(--variable-collection-accent)" }} to={"/profile/" + taskFreelancer.id}>
-                                    <div className="task-freelancerlink">
-                                        <b>
-                                            {" " + taskFreelancer.username}
-                                        </b>
-                                    </div>
-                                </Link>
-                            </>
+                        {task.status === "Открытая" ? (
+                            appcounter === 0 && (
+                                <SimpleButton
+                                    style="red"
+                                    icon="x"
+                                    onClick={handleTaskDelete}
+                                    disabled={isDeleting}
+                                >
+                                    Удалить заказ
+                                </SimpleButton>
+                            )
                         ) : (
                             <>
-                                Заказ выполнил фрилансер
-                                <Link style={{ textDecoration: "none", color: "var(--variable-collection-accent)" }} to={"/profile/" + taskFreelancer.id}>
+                                {task.status === "В процессе" ? "Работает фрилансер" : "Заказ выполнил фрилансер"}
+                                <Link
+                                    style={{ textDecoration: "none", color: "var(--variable-collection-accent)" }}
+                                    to={`/profile/${taskFreelancer.id}`}
+                                >
                                     <div className="task-freelancerlink">
-                                        <b>
-                                            {" " + taskFreelancer.username}
-                                        </b>
+                                        <b>{taskFreelancer.username}</b>
                                     </div>
                                 </Link>
                             </>
                         )}
-
                     </div>
-                ) : (
+                ) : task.status !== "На рассмотрении модерацией" && (
                     <div className="tbtop">
                         <div className="propblock">{taskOwner?.username}</div>
                         <div className="propblock black">
-                            <img src={ratingstar} alt="" />
+                            <img src={ratingstar} alt="Рейтинг" />
                             {taskOwner.profile?.rating || "0.0"}
                         </div>
                     </div>
