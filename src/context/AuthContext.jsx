@@ -31,12 +31,10 @@ export const AuthProvider = ({ children }) => {
         }
     }
 
-    async function tokenUpdater() {
 
-    }
 
     async function autoProfileUpdater() {
-        if (!myuser) return; // Добавляем проверку на существование myuser
+        if (!myuser) return;
 
         try {
             const { username, first_name, last_name, patronymic, email } = myuser;
@@ -53,7 +51,7 @@ export const AuthProvider = ({ children }) => {
 
             await api.put('/users/profile/update', profileData);
         } catch (error) {
-            console.log('Profile update error:', error);
+            console.log('Ошибка при обновлении профиля:', error);
         }
     }
 

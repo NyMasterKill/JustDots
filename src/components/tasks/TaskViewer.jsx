@@ -1,103 +1,63 @@
 import { useParams } from "react-router-dom";
-import { useEffect, useState, useContext, useRef } from "react";
-import { useNotification } from '../context/Notifications.jsx';
-import rubleicon from "../assets/ICONS/RUBLE.svg";
-import { AuthContext } from '../context/AuthContext';
-import api from '../services/api';
-import { CalcMinusDater } from '../utils/CalcMinusDater';
-import { AutoTextarea } from "./other/AutoTextarea.jsx";
-import { SimpleButton } from "../components/SimpleButton.jsx";
+import { useEffect, useState, useContext } from "react";
+import { useNotification } from '../../context/Notifications.jsx';
+import rubleicon from "../../assets/ICONS/RUBLE.svg";
+import { AuthContext } from '../../context/AuthContext.jsx';
+import api from '../../services/api.jsx';
+import { CalcMinusDater } from '../../utils/CalcMinusDater.jsx';
+import { AutoTextarea } from "../other/AutoTextarea.jsx";
+import { SimpleButton } from "../SimpleButton.jsx";
 import { Link, useNavigate } from "react-router-dom";
-import ratingstar from '../assets/ICONS/RATINGSTAR.svg'
-import { SERVER_URL } from "../pathconfig.js";
-import Loader from './Loader.jsx';
-import Feedback from "./customer/Feedback.jsx";
-
+import ratingstar from '../../assets/ICONS/RATINGSTAR.svg'
+import { SERVER_URL } from "../../pathconfig.js";
+import Loader from '../Loader.jsx';
+import FeedbacksViewer from "../customer/FeedbacksViewer.jsx";
+import {getAppCounter} from "../../utils/AppCounter.jsx";
 
 export const TaskViewer = () => {
     const navigate = useNavigate();
     const { id } = useParams();
     const { myuser } = useContext(AuthContext);
-    const [loading, setLoading] = useState(false);
-    const [task, setTask] = useState(1);
-    const [appcounter, setAppCounter] = useState(0);
-    const [taskcounterapp, setTaskAppCounter] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [task, setTask] = useState(0);
     const notify = useNotification();
     const [taskOwner, setTaskOwner] = useState({});
     const [taskFreelancer, setTaskFreelancer] = useState({});
+    const [appcounter, setApps] = useState(0);
 
-    const handleTaskFetch = async () => {
-        if (!myuser) return;
-        const currentroute = myuser.user_type == "customer" ? `/tasks/tasks/${id}` : `/tasks/tasks/${id}/public`;
-        try {
-            setLoading(true);
-            const response = await api.get(currentroute);
-            setTask(response.data);
-        } catch (error) {
-            setLoading(false);
-            console.log(error);
-            navigate(`/profile/${myuser.id}`);
-            notify({ message: "Такого заказа не существует", type: "error", duration: 4200 });
-        }
-        finally {
-            setLoading(false);
-        }
-
-        if (myuser.user_type == "customer") {
+    useEffect(() => {
+        const handleTaskFetch = async () => {
+            if (!myuser) return;
+            const currentroute = myuser.user_type === "customer" ? `/tasks/tasks/${id}` : `/tasks/tasks/${id}/public`;
             try {
-                setLoading(true);
-                const counterresponse = await api.get(`/tasks/tasks/${id}/applications`);
-                setTaskAppCounter(counterresponse.data);
+                const taskResponse = await api.get(currentroute);
+                setTask(taskResponse.data);
+
+                if (taskResponse.data.owner_id) {
+                    const ownerResponse = await api.get(`/users/profile/${taskResponse.data.owner_id}`);
+                    setTaskOwner(ownerResponse.data);
+                }
+
+                if (taskResponse.data.freelancer_id) {
+                    const freelancerResponse = await api.get(`/users/profile/${taskResponse.data.freelancer_id}`);
+                    setTaskFreelancer(freelancerResponse.data);
+                }
+
+                const count = await getAppCounter(taskResponse.data.id);
+                setApps(count);
             } catch (error) {
+                console.error('Ошибка при загрузке данных:', error);
+                notify({ message: "Ошибка при загрузке данных", type: "error", duration: 4200 });
+            } finally {
                 setLoading(false);
-                console.log(error);
-            }
-            finally {
-                setLoading(false);
-            }
-        }
-    };
-
-    useEffect(() => {
-
-        handleTaskFetch();
-    }, [myuser])
-
-    useEffect(() => {
-        setAppCounter(taskcounterapp.length || 0);
-    }, [taskcounterapp])
-
-    //ПОЛУЧЕНИЕ ЗАКАЗЧИКА ЗАДАЧИ (ДЛЯ ФРИЛАНСЕРА) || ПОЛУЧЕНИЕ ФРИЛАНСЕРА (ДЛЯ ЗАКАЗЧИКА)
-    useEffect(() => {
-        const fetchTaskOwner = async () => {
-            if (!task || !task.owner_id) return;
-            try {
-                const response = await api.get(`/users/profile/${task.owner_id}`);
-                setTaskOwner(response.data);
-            } catch (error) {
-                console.error('Ошибка при получении профиля:', error);
             }
         };
-
-        const fetchFreelancer = async () => {
-            if (!task || !task.freelancer_id) return;
-
-            try {
-                const response = await api.get(`/users/profile/${task.freelancer_id}`);
-                setTaskFreelancer(response.data);
-            } catch (error) {
-                console.error('Ошибка при получении профиля:', error);
-            }
-
-        }
-
-        fetchTaskOwner();
-        fetchFreelancer();
-    }, [task]);
+        handleTaskFetch();
+    }, [id]);
 
     const handleTaskDelete = async () => {
         try {
-            const response = await api.delete(`/tasks/tasks/${task.id}`);
+            await api.delete(`/tasks/tasks/${task.id}`);
             notify({ message: `Заказ #${task.id} удален`, type: "info", duration: 4200 });
         }
         catch (error) {
@@ -111,30 +71,24 @@ export const TaskViewer = () => {
 
     const handleConfirmTask = async () => {
         try {
-            const confirmresponse = await api.post(`/tasks/tasks/${task.id}/close`);
+            await api.post(`/tasks/tasks/${task.id}/close`);
             notify({ message: `Заказ #${task.id} завершен`, type: "success", duration: 4200 });
         }
         catch (error) {
             console.log(error);
             notify({ message: `Ошибка при завершении заказа: ${error.message || "NuN"}`, type: "error", duration: 4200 });
         }
-        finally {
-            handleTaskFetch();
-        }
     }
 
     const handleSendApp = async () => {
         const nowdate = new Date().toISOString();
         try {
-            const sendresponse = await api.post(`/tasks/tasks/${task.id}/apply`, { comment: "test", proposed_price: 100, proposed_deadline: `${nowdate}` })
+            await api.post(`/tasks/tasks/${task.id}/apply`, { comment: "test", proposed_price: 100, proposed_deadline: `${nowdate}` })
             notify({ message: `Вы подали заявку на выполнение заказа #${task.id}`, type: "info", duration: 4200 });
         }
         catch (error) {
             console.log(error);
-            notify({ message: `Ошибка при подаче заявки: ${error.message || "NuN"}`, type: "error", duration: 4200 });
-        }
-        finally {
-            handleTaskFetch();
+            notify({ message: `${error.response?.data?.detail || "Ошибка при подаче заявки"}`, type: "error", duration: 4200 });
         }
     }
 
@@ -143,6 +97,7 @@ export const TaskViewer = () => {
             <Loader />
         )
     }
+
 
     const { diffresult, dayText, status } = CalcMinusDater(task.deadline);
     return (
@@ -298,14 +253,7 @@ export const TaskViewer = () => {
                             </div>
                         ) : (
                             <div className="tbbottom">
-                                {task.status == "Открытая" && myuser.user_type == "customer" ? (
-                                    <SimpleButton
-                                        style={appcounter > 0 ? "white butcounter" : "white"}
-                                        data-count={appcounter}
-                                    >
-                                        Заявки
-                                    </SimpleButton>
-                                ) : task.status == "В процессе" ? (
+                                {task.status == "В процессе" ? (
                                     <SimpleButton style="accent" onClick={handleConfirmTask}>
                                         Подтвердить выполнение заказа
                                     </SimpleButton>
@@ -316,15 +264,10 @@ export const TaskViewer = () => {
                         )}
                     </div>
 
-
                 </div>
 
-                <div className="bodyblock gap10">
-                    <div className="titleblock">
-                        {`Заявки (${appcounter})`}
-                    </div>
-                    <Feedback taskid={task.id}></Feedback>
-                </div>
+            <FeedbacksViewer task={task} user={myuser.user_type}></FeedbacksViewer>
+
             </div >
         </>
     )

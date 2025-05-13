@@ -1,100 +1,61 @@
 import { useEffect, useState, useContext } from "react";
-import rubleicon from "../assets/ICONS/RUBLE.svg";
-import { AuthContext } from '../context/AuthContext';
-import api from '../services/api';
-import { CalcMinusDater } from '../utils/CalcMinusDater';
+import rubleicon from "../../assets/ICONS/RUBLE.svg";
+import { AuthContext } from '../../context/AuthContext.jsx';
+import api from '../../services/api.jsx';
+import { CalcMinusDater } from '../../utils/CalcMinusDater.jsx';
 import { Link, useNavigate } from "react-router-dom";
-import { SimpleButton } from "../components/SimpleButton.jsx";
-import { useNotification } from '../context/Notifications.jsx';
-import ratingstar from '../assets/ICONS/RATINGSTAR.svg';
-import usericon from '../assets/ICONS/USER.svg';
-import usersicon from '../assets/ICONS/USERS.svg';
+import { SimpleButton } from "../SimpleButton.jsx";
+import { useNotification } from '../../context/Notifications.jsx';
+import ratingstar from '../../assets/ICONS/RATINGSTAR.svg';
+import {getAppCounter} from "../../utils/AppCounter.jsx";
+import usericon from '../../assets/ICONS/USER.svg';
+import usersicon from '../../assets/ICONS/USERS.svg';
 
 export const Task = ({ taskid }) => {
     const navigate = useNavigate();
     const { myuser } = useContext(AuthContext);
-    const [loading, setLoading] = useState(false);
-    const [taskcounterapp, setTaskAppCounter] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [task, setTask] = useState(1);
-    const [appcounter, setAppCounter] = useState(0);
     const [isDeleting, setIsDeleting] = useState(false);
     const [taskOwner, setTaskOwner] = useState({});
     const [taskFreelancer, setTaskFreelancer] = useState({});
+    const [appcounter, setApps] = useState(0);
     const notify = useNotification();
 
-    const handleTaskFetch = async () => {
-        if (!myuser) return;
-        const currentroute = myuser.user_type == "customer" ? `/tasks/tasks/${taskid}` : `/tasks/tasks/${taskid}/public`;
-        try {
-            setLoading(true);
-            const response = await api.get(currentroute);
-            setTask(response.data);
-        } catch (error) {
-            setLoading(false);
-            console.log(error);
-        }
-        finally {
-            setLoading(false);
-        }
-
-        if (myuser.user_type == "customer") {
+    useEffect(() => {
+        const handleTaskFetch = async () => {
+            if (!myuser) return;
+            const currentroute = myuser.user_type === "customer" ? `/tasks/tasks/${taskid}` : `/tasks/tasks/${taskid}/public`;
             try {
-                setLoading(true);
-                const counterresponse = await api.get(`/tasks/tasks/${taskid}/applications`);
-                setTaskAppCounter(counterresponse.data);
+                const taskResponse = await api.get(currentroute);
+                setTask(taskResponse.data);
+
+                if (taskResponse.data.owner_id) {
+                    const ownerResponse = await api.get(`/users/profile/${taskResponse.data.owner_id}`);
+                    setTaskOwner(ownerResponse.data);
+                }
+
+                if (taskResponse.data.freelancer_id) {
+                    const freelancerResponse = await api.get(`/users/profile/${taskResponse.data.freelancer_id}`);
+                    setTaskFreelancer(freelancerResponse.data);
+                }
+
+                const count = await getAppCounter(taskResponse.data.id);
+                setApps(count);
             } catch (error) {
+                console.error('Ошибка при загрузке данных:', error);
+                notify({ message: "Ошибка при загрузке данных", type: "error", duration: 4200 });
+            } finally {
                 setLoading(false);
-                console.log(error);
-            }
-            finally {
-                setLoading(false);
-            }
-        }
-    };
-
-    useEffect(() => {
-
-        handleTaskFetch();
-    }, [myuser])
-
-    useEffect(() => {
-        setAppCounter(taskcounterapp.length || 0);
-    }, [taskcounterapp])
-
-
-    //ПОЛУЧЕНИЕ ЗАКАЗЧИКА ЗАДАЧИ (ДЛЯ ФРИЛАНСЕРА) || ПОЛУЧЕНИЕ ФРИЛАНСЕРА (ДЛЯ ЗАКАЗЧИКА)
-    useEffect(() => {
-        const fetchTaskOwner = async () => {
-            if (!task || !task.owner_id) return;
-            try {
-                const response = await api.get(`/users/profile/${task.owner_id}`);
-                setTaskOwner(response.data);
-            } catch (error) {
-                console.error('Ошибка при получении профиля:', error);
             }
         };
-
-        const fetchFreelancer = async () => {
-            if (!task || !task.freelancer_id) return;
-
-            try {
-                const response = await api.get(`/users/profile/${task.freelancer_id}`);
-                setTaskFreelancer(response.data);
-            } catch (error) {
-                console.error('Ошибка при получении профиля:', error);
-            }
-
-        }
-
-        fetchTaskOwner();
-        fetchFreelancer();
-    }, [task]);
-
+        handleTaskFetch();
+    }, [taskid]);
 
 
     const handleTaskDelete = async () => {
         try {
-            const response = await api.delete(`/tasks/tasks/${task.id}`);
+            await api.delete(`/tasks/tasks/${task.id}`);
             setIsDeleting(true);
             notify({ message: `Заказ #${task.id} удален`, type: "info", duration: 4200 });
         }

@@ -1,8 +1,6 @@
-import { Task } from "./Task"
+import { Task } from "./tasks/Task.jsx"
 import { useState, useEffect } from "react";
 import api from "../services/api";
-import SimpleButton from "./SimpleButton";
-import { Link } from "react-router-dom";
 
 export const PublicTasks = () => {
     const [tasks, setTasks] = useState([]);

@@ -14,7 +14,8 @@ export const Feedback = ({ taskid }) => {
         if (!taskid) return;
         try {
             const response = await api.get(`/tasks/tasks/${taskid}/applications`);
-            setFeedbacks(response.data);
+            const filteredFeedbacks = response.data.filter(feedback => feedback.status === "На рассмотрении");
+            setFeedbacks(filteredFeedbacks);
         }
         catch (error) {
             console.log(error);

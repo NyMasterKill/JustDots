@@ -9,7 +9,7 @@ import { Main } from './components/layouts/Main';
 import { Customer } from './components/layouts/Customer';
 import { TaskCreator } from './components/customer/TaskCreator';
 import { MyTasks } from './components/MyTasks';
-import { TaskViewer } from './components/TaskViewer';
+import { TaskViewer } from './components/tasks/TaskViewer.jsx';
 import { Freelancer } from './components/layouts/Freelancer';
 import { PublicTasks } from './components/PublicTasks';
 
