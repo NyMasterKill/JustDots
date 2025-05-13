@@ -1,17 +1,47 @@
-FROM python:3.13.1-slim
+version: '3.8'
 
-RUN apt-get update && apt-get install -y \
-    postgresql-client \
-    libpq5 \
-    libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+    networks:
+      - app-network
+    volumes:
+      - ./app/:/app/app
 
-WORKDIR /app
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres 
+      POSTGRES_PASSWORD: TEST
+      POSTGRES_DB: freelance
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
 
-COPY requirements.txt . 
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@mail.ru
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+    networks:
+      - app-network
 
-RUN pip install --no-cache-dir -r requirements.txt
+volumes:
+  postgres_data:
 
-COPY . .
-
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+networks:
+  app-network:
+    driver: bridge
