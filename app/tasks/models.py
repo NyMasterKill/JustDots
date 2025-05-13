@@ -61,7 +61,7 @@ class Application(Base):
     __tablename__ = "applications"
 
     id = Column(Integer, primary_key=True, index=True)
-    task_id = Column(Integer, ForeignKey("tasks.id"), nullable=False)
+    task_id = Column(Integer, ForeignKey("tasks.id", ondelete="CASCADE"), nullable=False)
     freelancer_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     comment = Column(Text, nullable=True)
     proposed_price = Column(Float, nullable=True)
