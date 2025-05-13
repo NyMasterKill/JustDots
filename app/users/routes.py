@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Form, UploadFile,
 from sqlalchemy.orm import Session
 from ..auth.models import User, UserType
 from ..auth.dependencies import get_current_user
+from ..auth.routes import ban_user
 from ..auth.schemas import UserResponse
 from .models import Profile, Skill, Portfolio
 from .schemas import SkillCreate, PortfolioCreate, ProfileUpdate
@@ -182,11 +183,7 @@ async def update_avatar(
     )
 
 @router.get("/profile/{user_id}", response_model=UserResponse)
-async def get_user_profile(
-    user_id: int,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
+async def get_user_profile(user_id: int, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
@@ -206,18 +203,18 @@ async def get_user_profile(
         profile_data.portfolio = user.portfolio if user.portfolio else []
 
     return UserResponse(
-        id=current_user.id,
-        username=current_user.username,
-        first_name=current_user.first_name,
-        last_name=current_user.last_name,
-        patronymic=current_user.patronymic,
-        email=current_user.email,
-        user_type=current_user.user_type.value,
-        is_banned=current_user.is_banned,
-        ban_expires_at=current_user.ban_expires_at.isoformat() if user.ban_expires_at else None,
-        created_at=current_user.created_at.isoformat() if user.created_at else None,
+        id=user.id,
+        username=user.username,
+        first_name=user.first_name,
+        last_name=user.last_name,
+        patronymic=user.patronymic,
+        email=user.email,
+        user_type=user.user_type.value,
+        is_banned=user.is_banned,
+        ban_expires_at=user.ban_expires_at.isoformat() if user.ban_expires_at else None,
+        created_at=user.created_at.isoformat() if user.created_at else None,
         profile=profile_data,
-        skills=current_user.skills,
+        skills=user.skills,
         completed_tasks_count=completed_tasks_count
     )
 
