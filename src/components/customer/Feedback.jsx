@@ -9,7 +9,7 @@ import SimpleHatButton from "../SimpleHatButton.jsx";
 import rubleicon from "../../assets/ICONS/RUBLE.svg";
 import {useNotification} from "../../context/Notifications.jsx";
 
-export const Feedback = ({ taskid }) => {
+export const Feedback = ({ taskid, onAction, closing }) => {
     const [feedbacks, setFeedbacks] = useState([]);
     const notify = useNotification();
 
@@ -41,6 +41,7 @@ export const Feedback = ({ taskid }) => {
         }
         finally {
             feedbackFetcher();
+            closing();
         }
     }
 
@@ -73,8 +74,8 @@ export const Feedback = ({ taskid }) => {
                             {feedback.proposed_price}
                             <img src={rubleicon} style={{height: 20 + "px"}} />
                         </div>
-                        <SimpleButton style="accent" onClick={() => feedbackAccept(feedback.id)}>Принять</SimpleButton>
-                        <SimpleButton style="black"  onClick={() => feedbackReject(feedback.id)}>Отклонить</SimpleButton>
+                        <SimpleButton style="accent" onClick={() => {feedbackAccept(feedback.id); onAction?.();}}>Принять</SimpleButton>
+                        <SimpleButton style="black"  onClick={() => {feedbackReject(feedback.id); onAction?.();}}>Отклонить</SimpleButton>
                     </div>
                 </div>
             ))}

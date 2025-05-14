@@ -2,8 +2,19 @@ import React, {useEffect, useState} from 'react';
 import Feedback from "./Feedback.jsx";
 import {getAppCounter} from "../../utils/AppCounter.jsx";
 
-const FeedbacksViewer = ({task, user}) => {
+const FeedbacksViewer = ({task, user, onConfirm}) => {
     const [apps, setApps] = useState(0);
+    const [isClosed, setClosed] = useState(false);
+
+    const changeApps = () =>{
+        setApps(apps - 1);
+    }
+
+    const closing = () => {
+        setClosed(true);
+        onConfirm();
+    }
+
     useEffect(() => {
         const fetchAppCounter = async () => {
             if (task && task.id) {
@@ -14,6 +25,8 @@ const FeedbacksViewer = ({task, user}) => {
         fetchAppCounter();
     }, [task?.id]);
 
+    if(isClosed) return;
+
     if(user == "freelancer") return;
 
     return (
@@ -21,7 +34,7 @@ const FeedbacksViewer = ({task, user}) => {
             <div className="titleblock">
                 Заявки ({apps})
             </div>
-            <Feedback taskid={task.id}></Feedback>
+            <Feedback taskid={task.id} onAction={changeApps} closing={closing}></Feedback>
         </div>
     );
 };

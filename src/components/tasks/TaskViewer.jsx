@@ -24,6 +24,7 @@ export const TaskViewer = () => {
     const [taskOwner, setTaskOwner] = useState({});
     const [taskFreelancer, setTaskFreelancer] = useState({});
     const [appcounter, setApps] = useState(0);
+    const [isConfirmed, setConfirm] = useState(false);
 
     const handleTaskFetch = async () => {
         if (!myuser) return;
@@ -57,7 +58,7 @@ export const TaskViewer = () => {
 
     useEffect(() => {
         handleTaskFetch();
-    }, [id]);
+    }, [id, isConfirmed]);
 
     const handleTaskDelete = async () => {
         try {
@@ -95,6 +96,10 @@ export const TaskViewer = () => {
             console.log(error);
             notify({ message: `${error.response?.data?.detail || "Ошибка при подаче заявки"}`, type: "error", duration: 4200 });
         }
+    }
+
+    const handleConfirm = () => {
+        setConfirm(true);
     }
 
     if (loading) {
@@ -265,7 +270,7 @@ export const TaskViewer = () => {
 
                 </div>
                 {task.status == "Открытая" && myuser.user_type !== "freelancer" ? (
-                    <FeedbacksViewer task={task} user={myuser.user_type}></FeedbacksViewer>
+                    <FeedbacksViewer task={task} user={myuser.user_type} onConfirm={handleConfirm}></FeedbacksViewer>
                 ) : null}
             </div >
         </>
