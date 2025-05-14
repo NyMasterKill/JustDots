@@ -1,19 +1,20 @@
 import React, {useEffect, useState} from 'react';
 import api from "../../services/api.jsx";
 import Order from "./Order.jsx";
+import {useNavigate} from "react-router-dom";
 
 const ModerateOrders = () => {
     const [tasks, setTasks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-
+    const navigate = useNavigate();
     useEffect(() => {
         const fetchTasks = async () => {
             try {
                 const response = await api.get('/tasks/tasks/pending-moderation');
                 setTasks(response.data);
             } catch (err) {
-                {error.code == 401 && navigate("/login")};
+                {err.code == "ERR_BAD_REQUEST" && navigate("/login")};
                 setError(err.message);
             } finally {
                 setLoading(false);

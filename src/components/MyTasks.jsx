@@ -20,7 +20,7 @@ export const MyTasks = () => {
                 setTasks(response.data);
                 setLoading(false);
             } catch (err) {
-                {err.code == 401 && navigate("/login")};
+                {err.code == "ERR_BAD_REQUEST" && navigate("/login")};
                 console.log(err);
             } finally {
                 setLoading(false);

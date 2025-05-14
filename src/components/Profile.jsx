@@ -70,7 +70,7 @@ const Profile = () => {
                 const response = await api.get(`/users/profile/${id}`);
                 setProfile(response.data);
             } catch (error) {
-                {error.code == 401 && navigate("/login")};
+                {error.code == "ERR_BAD_REQUEST" && navigate("/login")};
                 console.error('Ошибка при получении профиля: ', error)
                 setProfile(myuser);
                 notify({ message: "Ошибка при получении профиля", type: "error", duration: 4200 });

@@ -15,7 +15,7 @@ export const PublicTasks = () => {
                 const response = await api.get('/tasks/tasks/public');
                 setTasks(response.data);
             } catch (err) {
-                {err.code == 401 && navigate("/login")};
+                {err.code == "ERR_BAD_REQUEST" && navigate("/login")};
                 setError(err.message);
             } finally {
                 setLoading(false);
