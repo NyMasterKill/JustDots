@@ -1,6 +1,6 @@
-import { Task } from "./tasks/Task.jsx"
+import { Task } from "../tasks/Task.jsx"
 import { useState, useEffect } from "react";
-import api from "../services/api";
+import api from "../../services/api.jsx";
 import {useNavigate} from "react-router-dom";
 
 export const PublicTasks = () => {
@@ -12,7 +12,7 @@ export const PublicTasks = () => {
     useEffect(() => {
         const fetchTasks = async () => {
             try {
-                const response = await api.get('/tasks/tasks/public');
+                const response = await api.get('/tasks/tasks/?filter=public');
                 setTasks(response.data);
             } catch (err) {
                 {err.code == "ERR_BAD_REQUEST" && navigate("/login")};

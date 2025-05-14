@@ -73,7 +73,7 @@ export const AuthProvider = ({ children }) => {
             localStorage.setItem('token', access_token);
             await fetchMe();
         } catch (error) {
-            console.error(error);
+            throw error;
         } finally {
             setLoading(false);
         }
@@ -93,7 +93,7 @@ export const AuthProvider = ({ children }) => {
                 user_type
             });
         } catch (error) {
-            console.error(error);
+            throw error;
         } finally {
             setLoading(false);
         }

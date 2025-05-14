@@ -16,7 +16,7 @@ export const Feedback = ({ taskid, onAction, closing }) => {
     const feedbackFetcher = async () => {
         if (!taskid) return;
         try {
-            const response = await api.get(`/tasks/tasks/${taskid}/applications`);
+            const response = await api.get(`/tasks/tasks/applications/?task_id=${taskid}`);
             const filteredFeedbacks = response.data.filter(feedback => feedback.status === "На рассмотрении");
             setFeedbacks(filteredFeedbacks);
         }

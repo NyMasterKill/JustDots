@@ -29,9 +29,8 @@ export const TaskViewer = () => {
 
     const handleTaskFetch = async () => {
         if (!myuser) return;
-        const currentroute = myuser.user_type === "customer" ? `/tasks/tasks/${id}` : `/tasks/tasks/${id}/public`;
         try {
-            const taskResponse = await api.get(currentroute);
+            const taskResponse = await api.get(`/tasks/tasks/${id}`);
             setTask(taskResponse.data);
 
             if (taskResponse.data.owner_id) {

@@ -9,14 +9,16 @@ export const MyTasks = () => {
     const {myuser} = useContext(AuthContext);
     const [tasks, setTasks] = useState([]);
     const [loading, setLoading] = useState(true);
-    const route = myuser.user_type === "freelancer" ? "/tasks/tasks/in-progress-tasks" : myuser.user_type === "customer" ? "/tasks/tasks" : null;
+    const routefilter =
+        myuser.user_type === "freelancer" ? "assigned" :
+            myuser.user_type === "customer" && "my"
     const navigate = useNavigate();
 
     useEffect(() => {
         const fetchTasks = async () => {
-            if (route == null) return;
+            if (routefilter == null) return;
             try {
-                const response = await api.get(route);
+                const response = await api.get(`/tasks/tasks/?filter=${routefilter}`);
                 setTasks(response.data);
                 setLoading(false);
             } catch (err) {

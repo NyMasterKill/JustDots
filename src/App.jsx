@@ -11,7 +11,7 @@ import { TaskCreator } from './components/customer/TaskCreator';
 import { MyTasks } from './components/MyTasks';
 import { TaskViewer } from './components/tasks/TaskViewer.jsx';
 import { Freelancer } from './components/layouts/Freelancer';
-import { PublicTasks } from './components/PublicTasks';
+import { PublicTasks } from './components/freelancer/PublicTasks.jsx';
 import {Moderator} from "./components/layouts/Moderator.jsx";
 import ModerateOrders from "./components/moderator/ModerateOrders.jsx";
 
