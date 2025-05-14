@@ -14,6 +14,8 @@ import FeedbacksViewer from "../customer/FeedbacksViewer.jsx";
 import {getAppCounter} from "../../utils/AppCounter.jsx";
 import TaskBudjet from "./TaskBudjet.jsx";
 import TaskStatus from "./TaskStatus.jsx";
+import InputorWLabel from "../InputorWLabel.jsx";
+import MakeReview from "./MakeReview.jsx";
 
 export const TaskViewer = () => {
     const navigate = useNavigate();
@@ -220,6 +222,9 @@ export const TaskViewer = () => {
                 {task.status == "Открытая" && myuser.user_type !== "freelancer" ? (
                     <FeedbacksViewer task={task} user={myuser.user_type} onConfirm={handleConfirm}></FeedbacksViewer>
                 ) : null}
+                {task.status == "Закрытая" && (
+                    <MakeReview task={task} taskowner={taskOwner} taskfreelancer={taskFreelancer}/>
+                )}
             </div >
         </>
     )

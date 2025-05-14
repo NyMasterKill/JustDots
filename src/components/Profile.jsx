@@ -139,7 +139,7 @@ const Profile = () => {
                             }
                             <div className={"propblock black"}>
                                 <img src={ratingstar} alt="" />
-                                {profile.rating || "0.0"}
+                                {profile.profile.rating || "0.0"}
                             </div>
                             <div className='propblock accent'>
                                 {profile.completed_tasks_count} {profile.user_type == "freelancer" ? "выполненных" : "завершённых"} заказов
