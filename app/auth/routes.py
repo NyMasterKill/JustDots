@@ -85,27 +85,22 @@ async def login_user(
         query = query.filter(User.username == user.username)
     else:
         raise HTTPException(status_code=400, detail="Необходимо указать email или username")
-
     db_user = query.first()
     if not db_user or not verify_password(user.password, db_user.hashed_password):
         raise HTTPException(status_code=401, detail="Неверный email, username или пароль")
 
-    # ✅ Проверяем, истёк ли срок бана
     if db_user.is_banned and db_user.ban_expires_at <= datetime.utcnow():
         db_user.is_banned = False
         db_user.ban_expires_at = None
-        db.commit()  # Сохраняем изменения в БД
+        db.commit()
         db.refresh(db_user)
 
-    # ❌ Если всё ещё в бане — запрещаем вход
     elif db_user.is_banned:
         raise HTTPException(status_code=403, detail="Ваш аккаунт временно заблокирован")
 
-    # Генерируем токены
     access_token = create_access_token(data={"sub": db_user.email})
     refresh_token = create_refresh_token(data={"sub": db_user.email})
 
-    # Устанавливаем refresh token в cookie
     response.set_cookie(
         key="refresh_token",
         value=refresh_token,
@@ -125,16 +120,13 @@ async def login_for_access_token(response: Response, form_data: OAuth2PasswordRe
         query = query.filter(User.email == input_value)
     else:
         query = query.filter(User.username == input_value)
-
     db_user = query.first()
-
     if db_user.is_banned and db_user.ban_expires_at <= datetime.utcnow():
         db_user.is_banned = False
         db_user.ban_expires_at = None
-        db.commit()  # Сохраняем изменения в БД
+        db.commit()
         db.refresh(db_user)
 
-    # ❌ Если всё ещё в бане — запрещаем вход
     elif db_user.is_banned:
         raise HTTPException(status_code=403, detail="Ваш аккаунт временно заблокирован")
 
@@ -143,15 +135,14 @@ async def login_for_access_token(response: Response, form_data: OAuth2PasswordRe
 
     access_token = create_access_token(data={"sub": db_user.email})
     refresh_token = create_refresh_token(data={"sub": db_user.email})
-    
-    # Устанавливаем refresh token в HTTP-only cookie
+
     response.set_cookie(
         key="refresh_token",
         value=refresh_token,
         httponly=True,
-        secure=False,  # Для localhost в разработке
+        secure=False,
         samesite="strict",
-        max_age=7 * 24 * 60 * 60  # 7 дней
+        max_age=7 * 24 * 60 * 60
     )
     
     return {"access_token": access_token, "token_type": "bearer"}
@@ -181,13 +172,11 @@ async def refresh_access_token(response: Response, refresh_token: str | None = C
     return {"access_token": new_access_token, "token_type": "bearer"}
 
 @router.post("/logout")
-async def logout_user(response: Response, current_user: User = Depends(get_current_user), db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
-    # Добавляем access token в чёрный список
+async def logout_user(response: Response, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
     blacklisted_token = BlacklistedToken(token=token)
     db.add(blacklisted_token)
     db.commit()
-    
-    # Очищаем refresh token cookie
+
     response.delete_cookie(key="refresh_token")
     
     return {"message": "Выход выполнен успешно, токен отозван"}
@@ -199,7 +188,7 @@ async def get_current_user_info(current_user: User = Depends(get_current_user), 
             Task.owner_id == current_user.id,
             Task.status == TaskStatus.CLOSED.value
         ).count()
-    else:  # FREELANCER
+    else:
         completed_tasks_count = db.query(Task).filter(
             Task.freelancer_id == current_user.id,
             Task.status == TaskStatus.CLOSED.value
@@ -226,19 +215,13 @@ async def get_current_user_info(current_user: User = Depends(get_current_user), 
         rating = current_user.rating
     )
 
-# ================== РОУТЫ ДЛЯ МОДЕРАТОРОВ ==================
-
 @router.post("/moderate/change-role", response_model=UserResponse)
 async def moderate_change_role(
     request_data: ChangeUserRoleRequest1,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """
-    Позволяет любому модератору менять роли между:
-        - CUSTOMER ↔ FREELANCER
-    Запрещено менять роль у пользователей с типом MODERATOR.
-    """
+
     if current_user.user_type != UserType.MODERATOR:
         raise HTTPException(status_code=403, detail="Только модераторы могут использовать этот эндпоинт")
 
@@ -246,14 +229,12 @@ async def moderate_change_role(
     if not target_user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
 
-    # ❌ Запрещаем изменение роли у других модераторов
     if target_user.user_type == UserType.MODERATOR:
         raise HTTPException(
             status_code=400,
             detail="Нельзя изменить роль пользователя с ролью 'модератор'"
         )
 
-    # Проверяем, что целевая роль — либо customer, либо freelancer
     allowed_roles = [UserType.CUSTOMER, UserType.FREELANCER]
     if request_data.new_role not in allowed_roles:
         raise HTTPException(
@@ -282,17 +263,13 @@ async def moderate_change_role(
         "completed_tasks_count": getattr(target_user, "completed_tasks_count", 0)
     })
 
-
 @router.post("/admin/change-role", response_model=UserResponse)
 async def admin_change_role(
     request_data: ChangeUserRoleRequest2,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """
-    Только главный модератор (id == 1) может использовать этот роут.
-    Позволяет назначать любую роль, включая 'moderator'.
-    """
+
     if current_user.user_type != UserType.MODERATOR or current_user.id != 1:
         raise HTTPException(status_code=403, detail="Доступ запрещён")
 
@@ -327,13 +304,7 @@ async def ban_user(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """
-    Роут для блокировки пользователя.
-    Доступен только модераторам.
-    Можно указать длительность бана:
-      - через количество дней (`duration_days`)
-      - или конкретную дату (`until`)
-    """
+
     if current_user.user_type != UserType.MODERATOR:
         raise HTTPException(status_code=403, detail="Только модератор может банить пользователей")
 
@@ -346,7 +317,6 @@ async def ban_user(
 
     from datetime import timedelta
 
-    # Вычисляем дату окончания бана
     if request_data.until:
         ban_expires_at = request_data.until
     elif request_data.duration_days is not None:
@@ -354,7 +324,6 @@ async def ban_user(
     else:
         raise HTTPException(status_code=400, detail="Не указано время окончания бана")
 
-    # Устанавливаем статус бана
     target_user.is_banned = True
     target_user.ban_expires_at = ban_expires_at
     db.commit()

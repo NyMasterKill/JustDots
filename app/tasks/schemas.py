@@ -27,7 +27,6 @@ class ApplicationStatus(str, Enum):
     ACCEPTED = "Принята"
     REJECTED = "Отклонена"
 
-# Для создания задачи
 class TaskCreate(BaseModel):
     title: str
     description: str
@@ -40,7 +39,6 @@ class TaskCreate(BaseModel):
 
     model_config = {"use_enum_values": True, "from_attributes": True}
 
-# Для обновления задачи
 class TaskUpdate(TaskCreate):
     title: Optional[str] = None
     description: Optional[str] = None
@@ -52,7 +50,6 @@ class TaskUpdate(TaskCreate):
     skill_level: Optional[TaskSkillLevel] = None
     status: Optional[TaskStatus] = None
 
-# Ответ при получении задачи
 class TaskResponse(BaseModel):
     id: int
     title: str
@@ -69,7 +66,6 @@ class TaskResponse(BaseModel):
 
     model_config = {"use_enum_values": True, "from_attributes": True}
 
-# Для создания заявки
 class ApplicationCreate(BaseModel):
     comment: Optional[str] = None
     proposed_price: Optional[float] = None
@@ -77,7 +73,6 @@ class ApplicationCreate(BaseModel):
 
     model_config = {"from_attributes": True}
 
-# Ответ при получении заявки
 class ApplicationResponse(BaseModel):
     id: int
     task_id: int
