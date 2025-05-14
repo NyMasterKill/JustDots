@@ -12,12 +12,13 @@ import { MyTasks } from './components/MyTasks';
 import { TaskViewer } from './components/tasks/TaskViewer.jsx';
 import { Freelancer } from './components/layouts/Freelancer';
 import { PublicTasks } from './components/PublicTasks';
+import {Moderator} from "./components/layouts/Moderator.jsx";
+import ModerateOrders from "./components/moderator/ModerateOrders.jsx";
 
 const App = () => {
   return (
     <NotificationProvider>
       <AuthProvider>
-
         <Router>
           <Navbar />
           <Routes>
@@ -34,9 +35,11 @@ const App = () => {
               <Route path="/mytasks" element={<MyTasks />} />
               <Route path="/task/:id" element={<TaskViewer />} />
             </Route>
+            <Route element={<Moderator/>}>
+              <Route path="/moderate" element={<ModerateOrders/>}></Route>
+            </Route>
           </Routes>
         </Router>
-
       </AuthProvider >
     </NotificationProvider>
   );

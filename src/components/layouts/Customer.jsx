@@ -1,6 +1,6 @@
-import { useState, useContext, Children } from 'react';
+import { useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
-import { Navigate, useNavigate, Outlet, Route, Router } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
 
 export const Customer = () => {
     const { myuser } = useContext(AuthContext);

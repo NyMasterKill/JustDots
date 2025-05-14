@@ -27,7 +27,7 @@ export const AutoTextarea = ({ children }) => {
     return (
         <textarea
             ref={textareaRef}
-            placeholder="Введите текст..."
+            placeholder=""
             value={children}
             className='taskblock-desc'
             rows={1}

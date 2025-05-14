@@ -38,7 +38,9 @@ const Login = () => {
         return <Loader></Loader>
     }
 
-    if (isAuthenticated) {
+    if (isAuthenticated && myuser.user_type === "moderator") {
+        return <Navigate to={"/moderate"}/>
+    }else if(isAuthenticated){
         return <Navigate to={"/profile/" + myuser.id} />
     }
 

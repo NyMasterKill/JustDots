@@ -70,6 +70,7 @@ const Profile = () => {
                 const response = await api.get(`/users/profile/${id}`);
                 setProfile(response.data);
             } catch (error) {
+                {error.code == 401 && navigate("/login")};
                 console.error('Ошибка при получении профиля: ', error)
                 setProfile(myuser);
                 notify({ message: "Ошибка при получении профиля", type: "error", duration: 4200 });
@@ -89,7 +90,6 @@ const Profile = () => {
 
 
     const { daysDiff, dayText } = CalcDater(profile.created_at);
-    console.log(profile);
     return (
         <>
             <div className='hatsaver'></div>

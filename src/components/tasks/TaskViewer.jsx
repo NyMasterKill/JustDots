@@ -46,6 +46,7 @@ export const TaskViewer = () => {
                 const count = await getAppCounter(taskResponse.data.id);
                 setApps(count);
             } catch (error) {
+                {error.code == 401 && navigate("/login")};
                 console.error('Ошибка при загрузке данных:', error);
                 notify({ message: "Ошибка при загрузке данных", type: "error", duration: 4200 });
             } finally {
@@ -221,9 +222,9 @@ export const TaskViewer = () => {
                                         <div className="miniprofile">
                                             {taskOwner.username}
                                             <div className="miniprofile-avatar">
-                                                {taskOwner?.profile?.avatar_url && (
+                                                {taskOwner?.profile?.avatar_url ? (
                                                     <img src={`${SERVER_URL}${taskOwner.profile.avatar_url}`} alt="Аватар заказчика" />
-                                                )}
+                                                ) : (<div/>)}
                                             </div>
                                             <div className="propblock black">
                                                 <img src={ratingstar} alt="Рейтинг" />

@@ -2,7 +2,7 @@ import { Task } from "./tasks/Task.jsx"
 import {useState, useEffect, useContext} from "react";
 import api from "../services/api";
 import SimpleButton from "./SimpleButton";
-import { Link } from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import {AuthContext} from "../context/AuthContext.jsx";
 
 export const MyTasks = () => {
@@ -10,6 +10,7 @@ export const MyTasks = () => {
     const [tasks, setTasks] = useState([]);
     const [loading, setLoading] = useState(true);
     const route = myuser.user_type === "freelancer" ? "/tasks/tasks/in-progress-tasks" : myuser.user_type === "customer" ? "/tasks/tasks" : null;
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchTasks = async () => {
@@ -19,6 +20,7 @@ export const MyTasks = () => {
                 setTasks(response.data);
                 setLoading(false);
             } catch (err) {
+                {err.code == 401 && navigate("/login")};
                 console.log(err);
             } finally {
                 setLoading(false);

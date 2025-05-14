@@ -1,27 +1,24 @@
-import { Task } from "./tasks/Task.jsx"
-import { useState, useEffect } from "react";
-import api from "../services/api";
-import {useNavigate} from "react-router-dom";
+import React, {useEffect, useState} from 'react';
+import api from "../../services/api.jsx";
+import Order from "./Order.jsx";
 
-export const PublicTasks = () => {
+const ModerateOrders = () => {
     const [tasks, setTasks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchTasks = async () => {
             try {
-                const response = await api.get('/tasks/tasks/public');
+                const response = await api.get('/tasks/tasks/pending-moderation');
                 setTasks(response.data);
             } catch (err) {
-                {err.code == 401 && navigate("/login")};
+                {error.code == 401 && navigate("/login")};
                 setError(err.message);
             } finally {
                 setLoading(false);
             }
         };
-
         fetchTasks();
     }, []);
 
@@ -47,8 +44,8 @@ export const PublicTasks = () => {
         return (
             <>
                 <div className="hatsaver"></div>
-                <div className="blocktitle">лента заказов</div>
-                <div>тут пусто</div>
+                <div className="blocktitle">модерация заказов</div>
+                <div>Новых заказов нет</div>
             </>
         )
     }
@@ -56,15 +53,15 @@ export const PublicTasks = () => {
     return (
         <>
             <div className="hatsaver"></div>
-            <div className="blocktitle">лента заказов</div>
+            <div className="blocktitle">модерация заказов</div>
             <div className="bodyblock gap10">
                 {tasks.map((task) => (
-                    <Task key={task.id} task={task} />
+                    <Order key={task.id} task={task} />
                 ))}
             </div>
         </>
 
     )
-}
+};
 
-export default PublicTasks
+export default ModerateOrders;
