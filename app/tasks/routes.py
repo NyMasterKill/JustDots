@@ -6,6 +6,7 @@ from app.database import get_db
 from .models import Task, TaskCategory, TaskSkillLevel, TaskStatus, Application, ApplicationStatus
 from .schemas import TaskCreate, TaskUpdate, TaskResponse, ApplicationCreate, ApplicationResponse
 from app.auth.models import User, UserType
+from sqlalchemy import or_
 from typing import List, Optional
 
 router = APIRouter(prefix="/tasks", tags=["Tasks"])
@@ -166,21 +167,64 @@ async def get_public_tasks(
     tasks = query.offset(skip).limit(limit).all()
     return [TaskResponse.model_validate(task.__dict__) for task in tasks]
 
-@router.get("/in-progress-tasks", response_model=List[TaskResponse])
-async def get_in_progress_tasks(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-    skip: int = Query(0, ge=0, description="Пропустить первые N записей"),
-    limit: int = Query(10, ge=1, le=100, description="Максимальное количество записей")
+
+@router.get("/freelancer/my_task", response_model=List[TaskResponse])
+async def get_all_tasks(
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_user),
+        skip: int = Query(0, ge=0, description="Пропустить первые N записей"),
+        limit: int = Query(10, ge=1, le=100, description="Максимальное количество записей")
 ):
-    print(f"Processing get_in_progress_tasks with skip: {skip}, limit: {limit}, user_id: {current_user.id}")
+    """
+    Получить список всех задач для фрилансера, находящихся в статусах OPEN или IN_PROGRESS.
+    """
+    print(f"Processing get_all_tasks with skip: {skip}, limit: {limit}, user_id: {current_user.id}")
+
+    # Проверка, что текущий пользователь является фрилансером
     if current_user.user_type != UserType.FREELANCER:
-        raise HTTPException(status_code=403, detail="Только фрилансеры могут просматривать свои задачи в процессе")
+        raise HTTPException(status_code=403, detail="Только фрилансеры могут просматривать свои задачи")
+
+    # Запрос задач, которые находятся в статусе OPEN или IN_PROGRESS
     tasks = db.query(Task).filter(
-        and_(Task.freelancer_id == current_user.id, Task.status == TaskStatus.IN_PROGRESS)
+        and_(
+            Task.freelancer_id == current_user.id,
+            or_(Task.status == TaskStatus.CLOSED, Task.status == TaskStatus.IN_PROGRESS)
+        )
     ).offset(skip).limit(limit).all()
+
+    # Преобразование результатов в формат ответа
     return [TaskResponse.model_validate(task.__dict__) for task in tasks]
 
+@router.get("/freelancer/task/{task_id}", response_model=TaskResponse)
+async def get_task_by_id(
+        task_id: int,
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_user)
+):
+    """
+    Получить задачу по её ID для фрилансера, если она находится в статусах OPEN или IN_PROGRESS.
+    """
+    print(f"Processing get_task_by_id with task_id: {task_id}, user_id: {current_user.id}")
+
+    # Проверка, что текущий пользователь является фрилансером
+    if current_user.user_type != UserType.FREELANCER:
+        raise HTTPException(status_code=403, detail="Только фрилансеры могут просматривать свои задачи")
+
+    # Запрос задачи по ID, которая находится в статусе OPEN или IN_PROGRESS и принадлежит текущему пользователю
+    task = db.query(Task).filter(
+        and_(
+            Task.id == task_id,
+            Task.freelancer_id == current_user.id,
+            or_(Task.status == TaskStatus.CLOSED, Task.status == TaskStatus.IN_PROGRESS)
+        )
+    ).first()
+
+    # Если задача не найдена, возвращаем ошибку 404
+    if not task:
+        raise HTTPException(status_code=404, detail="Задача не найдена или недоступна для просмотра")
+
+    # Преобразование результатов в формат ответа
+    return TaskResponse.model_validate(task.__dict__)
 
 @router.get("/my-applications", response_model=List[ApplicationResponse])
 async def get_my_applications(
