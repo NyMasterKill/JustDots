@@ -14,7 +14,6 @@ from sqlalchemy.exc import IntegrityError
 from psycopg.errors import UniqueViolation
 from sqlalchemy import delete
 
-
 router = APIRouter()
 
 UPLOAD_DIR = Path("uploads/avatars")
@@ -26,7 +25,6 @@ async def update_profile(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    # Обновление данных пользователя (User)
     if profile_data.username is not None:
         current_user.username = profile_data.username
     if profile_data.first_name is not None:
@@ -38,7 +36,6 @@ async def update_profile(
     if profile_data.email is not None:
         current_user.email = profile_data.email
 
-    # Обновление профиля (Profile)
     profile = db.query(Profile).filter(Profile.user_id == current_user.id).first()
     if not profile:
         profile = Profile(user_id=current_user.id)
@@ -48,20 +45,14 @@ async def update_profile(
     if profile_data.bio is not None:
         profile.bio = profile_data.bio
 
-    # Обновление skills
     if profile_data.skills is not None:
-        # Удаляем старые навыки
         db.execute(delete(Skill).where(Skill.user_id == current_user.id))
-        # Добавляем новые навыки
         for skill_data in profile_data.skills:
             skill = Skill(user_id=current_user.id, name=skill_data.name)
             db.add(skill)
 
-    # Обновление portfolio
     if profile_data.portfolio is not None:
-        # Удаляем старое портфолио
         db.execute(delete(Portfolio).where(Portfolio.user_id == current_user.id))
-        # Добавляем новое портфолио
         for portfolio_data in profile_data.portfolio:
             portfolio = Portfolio(
                 user_id=current_user.id,
@@ -84,13 +75,12 @@ async def update_profile(
 
     db.refresh(current_user)
 
-    # Подсчёт завершённых задач
     if current_user.user_type == UserType.CUSTOMER:
         completed_tasks_count = db.query(Task).filter(
             Task.owner_id == current_user.id,
             Task.status == TaskStatus.CLOSED.value
         ).count()
-    else:  # FREELANCER
+    else:
         completed_tasks_count = db.query(Task).filter(
             Task.freelancer_id == current_user.id,
             Task.status == TaskStatus.CLOSED.value
@@ -118,25 +108,23 @@ async def update_profile(
 
 @router.put("/profile/avatar", response_model=UserResponse)
 async def update_avatar(
-    avatar: UploadFile = File(None),  # Только аватарка через File
+    avatar: UploadFile = File(None),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    # Обновление профиля (Profile)
     profile = db.query(Profile).filter(Profile.user_id == current_user.id).first()
     if not profile:
         profile = Profile(user_id=current_user.id)
         db.add(profile)
         db.commit()
 
-    # Обработка загрузки аватарки
-    if avatar:  # Если аватарка передана
+    if avatar:
         allowed_extensions = {".png", ".jpg", ".jpeg"}
         file_extension = os.path.splitext(avatar.filename)[1].lower()
         if file_extension not in allowed_extensions:
             raise HTTPException(status_code=400, detail="Only PNG, JPG, and JPEG files are allowed")
         
-        max_size = 5 * 1024 * 1024  # 5 МБ
+        max_size = 5 * 1024 * 1024
         content = await avatar.read()
         if len(content) > max_size:
             raise HTTPException(status_code=400, detail="File size must not exceed 5 MB")
@@ -150,13 +138,12 @@ async def update_avatar(
     db.commit()
     db.refresh(current_user)
 
-    # Подсчёт завершённых задач
     if current_user.user_type == UserType.CUSTOMER:
         completed_tasks_count = db.query(Task).filter(
             Task.owner_id == current_user.id,
             Task.status == TaskStatus.CLOSED.value
         ).count()
-    else:  # FREELANCER
+    else:
         completed_tasks_count = db.query(Task).filter(
             Task.freelancer_id == current_user.id,
             Task.status == TaskStatus.CLOSED.value
@@ -192,7 +179,7 @@ async def get_user_profile(user_id: int, db: Session = Depends(get_db)):
             Task.owner_id == user.id,
             Task.status == TaskStatus.CLOSED.value
         ).count()
-    else:  # FREELANCER
+    else:
         completed_tasks_count = db.query(Task).filter(
             Task.freelancer_id == user.id,
             Task.status == TaskStatus.CLOSED.value

@@ -9,7 +9,7 @@ class Profile(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, unique=True)
     bio = Column(Text, nullable=True)
     rating = Column(Float, nullable=False, default=0.0)
-    avatar_url = Column(String, nullable=True)  # Добавляем поле для пути к аватарке
+    avatar_url = Column(String, nullable=True)
     
     user = relationship("User", back_populates="profile")
 

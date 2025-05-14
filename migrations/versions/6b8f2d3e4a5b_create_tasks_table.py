@@ -1,14 +1,7 @@
-"""Create tasks table with updated TaskSkillLevel enum values
-
-Revision ID: 6b8f2d3e4a5b
-Revises: 8822d5d2ee23
-Create Date: 2025-05-02 12:00:00
-"""
 from alembic import op
 import sqlalchemy as sa
 from app.tasks.models import TaskStatus
 
-# revision identifiers, used by Alembic.
 revision = '6b8f2d3e4a5b'
 down_revision = '5a1649caf4a3'
 branch_labels = None

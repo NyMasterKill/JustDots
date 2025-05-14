@@ -17,7 +17,6 @@ class UserCreate(BaseModel):
 
     @validator("username")
     def validate_username(cls, v):
-        # Регулярное выражение: только латинские буквы, цифры, подчёркивания, длина 3-50
         if not re.match(r"^[a-zA-Z0-9_]{3,50}$", v):
             raise ValueError(
                 "Username должен содержать только латинские буквы, цифры и подчёркивания, "
@@ -67,7 +66,7 @@ class Token(BaseModel):
 
 class ChangeUserRoleRequest1(BaseModel):
     user_id: int
-    new_role: UserType  # Это тот же enum, что и в models.UserType
+    new_role: UserType
 
     @model_validator(mode='after')
     def prevent_moderator_role(self):

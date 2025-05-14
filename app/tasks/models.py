@@ -22,13 +22,11 @@ class TaskCategory(enum.Enum):
     COPYWRITING = "Копирайтинг"
     OTHER = "Другое"
 
-# Функция для извлечения значений enum
 def enum_values(enum_class):
     return [e.value for e in enum_class]
 
 class Task(Base):
     __tablename__ = "tasks"
-
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(255), nullable=False)
     description = Column(Text, nullable=False)
@@ -59,7 +57,6 @@ class ApplicationStatus(enum.Enum):
 
 class Application(Base):
     __tablename__ = "applications"
-
     id = Column(Integer, primary_key=True, index=True)
     task_id = Column(Integer, ForeignKey("tasks.id", ondelete="CASCADE"), nullable=False)
     freelancer_id = Column(Integer, ForeignKey("users.id"), nullable=False)

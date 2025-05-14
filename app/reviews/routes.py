@@ -12,7 +12,6 @@ logging.basicConfig(level=logging.DEBUG)
 
 router = APIRouter(prefix="/reviews", tags=["Reviews"])
 
-
 @router.post("/{task_id}/review", response_model=ReviewResponse, status_code=status.HTTP_201_CREATED)
 async def create_review(
     task_id: int,
@@ -20,24 +19,20 @@ async def create_review(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    # 1. Проверяем задачу
     task = db.query(Task).filter(Task.id == task_id).first()
     if not task:
         raise HTTPException(status_code=404, detail="Задача не найдена")
     if task.status != TaskStatus.CLOSED:
         raise HTTPException(status_code=400, detail="Задача должна быть закрыта для отзыва")
 
-    # 2. Проверяем, что пользователь участник задачи
     if current_user.id not in [task.owner_id, task.freelancer_id]:
         raise HTTPException(status_code=403, detail="Вы не участвовали в этой задаче")
 
-    # 3. Кто кому оставляет отзыв
     if current_user.id == task.owner_id:
-        reviewer_id = task.freelancer_id  # заказчик -> фрилансер
+        reviewer_id = task.freelancer_id
     else:
-        reviewer_id = task.owner_id       # фрилансер -> заказчик
+        reviewer_id = task.owner_id
 
-    # 4. Проверяем, не был ли уже оставлен отзыв по этой задаче
     existing_review = db.query(Review).filter(
         Review.user_id == current_user.id,
         Review.reviewer_id == reviewer_id,
@@ -47,7 +42,6 @@ async def create_review(
     if existing_review:
         raise HTTPException(status_code=400, detail="Вы уже оставили отзыв по этой задаче")
 
-    # 5. Создаем отзыв
     new_review = Review(
         user_id=current_user.id,
         reviewer_id=reviewer_id,
@@ -59,7 +53,6 @@ async def create_review(
     db.commit()
     db.refresh(new_review)
 
-    # 6. Обновляем средний рейтинг получателя
     reviews = db.query(Review).filter(Review.reviewer_id == reviewer_id).all()
     total_score = sum(review.score for review in reviews)
     average_rating = total_score / len(reviews) if reviews else 0.0
@@ -71,7 +64,6 @@ async def create_review(
     reviewer.rating = average_rating
     if reviewer.profile:
         reviewer.profile.rating = average_rating
-
     db.commit()
     return new_review
 

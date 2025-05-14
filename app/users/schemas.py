@@ -44,7 +44,7 @@ class Portfolio(PortfolioBase):
 class ProfileBase(BaseModel):
     bio: str | None = None
     rating: float | None = None
-    avatar_url: str | None = None  # Добавляем avatar_url
+    avatar_url: str | None = None
 
 class Profile(ProfileBase):
     user_id: int
@@ -67,7 +67,7 @@ class ProfileUpdate(BaseModel):
     last_name: str | None = None
     patronymic: str | None = None
     email: str | None = None
-    bio: str | None = None  # Возвращаем bio в схему
+    bio: str | None = None
     skills: List[SkillCreate] | None = None
     portfolio: List[PortfolioCreate] | None = None
 
@@ -88,6 +88,6 @@ class ProfileUpdate(BaseModel):
 
     @validator("bio")
     def validate_bio(cls, v):
-        if v and len(v) > 500:  # Ограничим до 500 символов
+        if v and len(v) > 500:
             raise ValueError("Bio must not exceed 500 characters")
         return v
