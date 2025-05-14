@@ -25,34 +25,37 @@ export const TaskViewer = () => {
     const [taskFreelancer, setTaskFreelancer] = useState({});
     const [appcounter, setApps] = useState(0);
 
-    useEffect(() => {
-        const handleTaskFetch = async () => {
-            if (!myuser) return;
-            const currentroute = myuser.user_type === "customer" ? `/tasks/tasks/${id}` : `/tasks/tasks/${id}/public`;
-            try {
-                const taskResponse = await api.get(currentroute);
-                setTask(taskResponse.data);
+    const handleTaskFetch = async () => {
+        if (!myuser) return;
+        const currentroute = myuser.user_type === "customer" ? `/tasks/tasks/${id}` : `/tasks/tasks/${id}/public`;
+        try {
+            const taskResponse = await api.get(currentroute);
+            setTask(taskResponse.data);
 
-                if (taskResponse.data.owner_id) {
-                    const ownerResponse = await api.get(`/users/profile/${taskResponse.data.owner_id}`);
-                    setTaskOwner(ownerResponse.data);
-                }
-
-                if (taskResponse.data.freelancer_id) {
-                    const freelancerResponse = await api.get(`/users/profile/${taskResponse.data.freelancer_id}`);
-                    setTaskFreelancer(freelancerResponse.data);
-                }
-
-                const count = await getAppCounter(taskResponse.data.id);
-                setApps(count);
-            } catch (error) {
-                {error.code == 401 && navigate("/login")};
-                console.error('Ошибка при загрузке данных:', error);
-                notify({ message: "Ошибка при загрузке данных", type: "error", duration: 4200 });
-            } finally {
-                setLoading(false);
+            if (taskResponse.data.owner_id) {
+                const ownerResponse = await api.get(`/users/profile/${taskResponse.data.owner_id}`);
+                setTaskOwner(ownerResponse.data);
             }
-        };
+
+            if (taskResponse.data.freelancer_id) {
+                const freelancerResponse = await api.get(`/users/profile/${taskResponse.data.freelancer_id}`);
+                setTaskFreelancer(freelancerResponse.data);
+            }
+
+            if(!task.freelancer_id && myuser.user_type !== "customer"){
+                const count = await getAppCounter(task.id);
+                setApps(count);
+            }
+        } catch (error) {
+            {error.code == 401 && navigate("/login")};
+            console.error('Ошибка при загрузке данных:', error);
+            notify({ message: "Ошибка при загрузке данных", type: "error", duration: 4200 });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
         handleTaskFetch();
     }, [id]);
 
@@ -74,6 +77,7 @@ export const TaskViewer = () => {
         try {
             await api.post(`/tasks/tasks/${task.id}/close`);
             notify({ message: `Заказ #${task.id} завершен`, type: "success", duration: 4200 });
+            handleTaskFetch();
         }
         catch (error) {
             console.log(error);
@@ -148,7 +152,6 @@ export const TaskViewer = () => {
                                         <span style={{ fontSize: 17 + "px", paddingTop: 5 + "px" }}>за заказ</span>
                                     </>
                                 )}
-
                             </div>
                             <div className="tblbottom">
                                 <div className={`propblock${task.status === "Закрытая" ? " black" : ""}`}>
@@ -214,7 +217,7 @@ export const TaskViewer = () => {
                                     </div>
                                 )}
                             </div>
-                        ) : task.status !== "На рассмотрении модерацией" && (
+                        ) : task.status !== "На рассмотрении модерацией" ? (
                             <div className="tbtop">
                                 <div className="task-freelancerlinkfull">
                                     <span>Заказчик</span>
@@ -233,6 +236,12 @@ export const TaskViewer = () => {
                                         </div>
                                     </Link>
                                 </div>
+                            </div>
+                        ) : task.status === "На рассмотрении модерацией" && (
+                            <div className="tbtop">
+                                <SimpleButton style="red" icon="x" onClick={handleTaskDelete}>
+                                    Удалить заказ
+                                </SimpleButton>
                             </div>
                         )}
                         {myuser.user_type == "freelancer" ? (
@@ -255,7 +264,7 @@ export const TaskViewer = () => {
                     </div>
 
                 </div>
-                {task.status == "Открытая" ? (
+                {task.status == "Открытая" && myuser.user_type !== "freelancer" ? (
                     <FeedbacksViewer task={task} user={myuser.user_type}></FeedbacksViewer>
                 ) : null}
             </div >

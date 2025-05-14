@@ -29,13 +29,15 @@ export const Task = ({ task }) => {
                     setTaskOwner(ownerResponse.data);
                 }
 
-                if (task.freelancer_id) {
+                if (task.freelancer_id && task.freelancer_id !== myuser.id) {
                     const freelancerResponse = await api.get(`/users/profile/${task.freelancer_id}`);
                     setTaskFreelancer(freelancerResponse.data);
                 }
 
-                const count = await getAppCounter(task.id);
-                setApps(count);
+                if(!task.freelancer_id && myuser.id == task.owner_id){
+                    const count = await getAppCounter(task.id);
+                    setApps(count);
+                }
             } catch (error) {
                 setErr(error);
                 console.error('Ошибка при загрузке данных:', error);
@@ -176,7 +178,7 @@ export const Task = ({ task }) => {
                             </>
                         )}
                     </div>
-                ) : task.status !== "На рассмотрении модерацией" && (
+                ) : task.status !== "На рассмотрении модерацией" ? (
                     <div className="tbtop">
                         <div className="propblock">{taskOwner?.username}</div>
                         <div className="propblock black">
@@ -184,7 +186,18 @@ export const Task = ({ task }) => {
                             {taskOwner.profile?.rating || "0.0"}
                         </div>
                     </div>
-                )}
+                ) : task.status === "На рассмотрении модерацией" && (
+                    <div className="tbtop">
+                        <SimpleButton
+                        style="red"
+                        icon="x"
+                        onClick={handleTaskDelete}
+                        disabled={isDeleting}
+                        >
+                            Удалить заказ
+                        </SimpleButton>
+                    </div>
+                    )}
                 <div className="tbbottom">
                     {task.status == "Открытая" && myuser.user_type == "customer" ? (
                         <SimpleButton
