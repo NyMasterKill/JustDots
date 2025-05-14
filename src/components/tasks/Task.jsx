@@ -8,6 +8,8 @@ import { SimpleButton } from "../SimpleButton.jsx";
 import { useNotification } from '../../context/Notifications.jsx';
 import ratingstar from '../../assets/ICONS/RATINGSTAR.svg';
 import {getAppCounter} from "../../utils/AppCounter.jsx";
+import TaskStatus from "./TaskStatus.jsx";
+import TaskBudjet from "./TaskBudjet.jsx";
 
 export const Task = ({ task }) => {
     const navigate = useNavigate();
@@ -96,77 +98,24 @@ export const Task = ({ task }) => {
                             </div>
                         ) : null}
                     </div>
-                    <div className="taskblock-price">
-                        {task.budget_max !== task.budget_min ? (
-                            <>
-                                {task.budget_min} - {task.budget_max}
-                                < img style={{ height: 22 + "px" }} src={rubleicon}></img>
-                                <span style={{ fontSize: 17 + "px", paddingTop: 5 + "px" }}>за заказ</span>
-                            </>
-                        ) : (
-                            <>
-                                {task.budget_max}
-                                < img style={{ height: 22 + "px" }} src={rubleicon}></img>
-                                <span style={{ fontSize: 17 + "px", paddingTop: 5 + "px" }}>за заказ</span>
-                            </>
-                        )}
-                    </div>
-                    <div className="tblbottom">
-                        <div className={`propblock${task.status === "Закрытая" ? " black" : ""}`}>
-                            {task.status === "Закрытая" ? (
-                                <span style={{ color: "white", fontSize: "14px", fontWeight: 800 }}>{task.status}</span>
-                            ) : task.status === "В процессе" ? (
-                                <span style={{ color: "black", fontSize: "14px", fontWeight: 800 }}>{task.status}</span>
-                            ) : task.status === "На рассмотрении модерацией" ? (
-                                <>
-                                    <div
-                                        style={{
-                                            width: "10px",
-                                            height: "10px",
-                                            background: "blue"
-                                        }}
-                                        className="ellipse"
-                                    />
-                                    <span style={{ color: "blue", fontSize: "14px", fontWeight: 800 }}>
-                                        {task.status}
-                                    </span>
-                                </>
-                            ) : (
-                                <>
-                                    <div
-                                        style={{
-                                            width: "10px",
-                                            height: "10px",
-                                            background: "limegreen"
-                                        }}
-                                        className="ellipse"
-                                    />
-                                    <span style={{ color: "limegreen", fontSize: "14px", fontWeight: 800 }}>
-                                        {task.status}
-                                    </span>
-                                </>
-                            )}
-                        </div>
-                    </div>
+                    <TaskBudjet bmin={task.budget_min} bmax={task.budget_max} view="min"/>
+                    <TaskStatus status={task.status}/>
                 </div>
             </div>
             <div className="taskblock">
                 {myuser.id === taskOwner.id && task.status !== "На рассмотрении модерацией" ? (
                     <div className="tbtop">
-                        {task.status === "Открытая" ? (
-                            appcounter === 0 && (
-                                <SimpleButton
-                                    style="red"
-                                    icon="x"
-                                    onClick={handleTaskDelete}
-                                    disabled={isDeleting}
-                                >
-                                    Удалить заказ
-                                </SimpleButton>
-                            )
+                        {task.status === "Открытая" || task.status === "Отклонена модерацией" ? (
+                            <SimpleButton
+                                style="red"
+                                onClick={handleTaskDelete}
+                                disabled={isDeleting}
+                            >
+                                Удалить заказ
+                            </SimpleButton>
                         ) : (
                             <>
-                                {task.status === "В процессе" ? "Работает фрилансер" : "Заказ выполнил фрилансер"}
+                                {task.status === "В процессе" ? "Работает фрилансер" : "Заказ выполнил"}
                                 <Link
                                     style={{ textDecoration: "none", color: "var(--variable-collection-accent)" }}
                                     to={`/profile/${taskFreelancer.id}`}

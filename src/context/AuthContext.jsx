@@ -44,7 +44,7 @@ export const AuthProvider = ({ children }) => {
                 last_name,
                 patronymic,
                 email,
-                bio: "empty",
+                bio: "Тут пусто",
                 skills: [{ name: "test" }],
                 portfolio: [{ title: "test", description: "test", url: "test" }]
             };
@@ -73,7 +73,7 @@ export const AuthProvider = ({ children }) => {
             localStorage.setItem('token', access_token);
             await fetchMe();
         } catch (error) {
-            throw error;
+            console.error(error);
         } finally {
             setLoading(false);
         }
@@ -93,7 +93,7 @@ export const AuthProvider = ({ children }) => {
                 user_type
             });
         } catch (error) {
-            throw error;
+            console.error(error);
         } finally {
             setLoading(false);
         }

@@ -1,7 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState, useContext } from "react";
 import { useNotification } from '../../context/Notifications.jsx';
-import rubleicon from "../../assets/ICONS/RUBLE.svg";
 import { AuthContext } from '../../context/AuthContext.jsx';
 import api from '../../services/api.jsx';
 import { CalcMinusDater } from '../../utils/CalcMinusDater.jsx';
@@ -13,6 +12,8 @@ import { SERVER_URL } from "../../pathconfig.js";
 import Loader from '../Loader.jsx';
 import FeedbacksViewer from "../customer/FeedbacksViewer.jsx";
 import {getAppCounter} from "../../utils/AppCounter.jsx";
+import TaskBudjet from "./TaskBudjet.jsx";
+import TaskStatus from "./TaskStatus.jsx";
 
 export const TaskViewer = () => {
     const navigate = useNavigate();
@@ -48,7 +49,7 @@ export const TaskViewer = () => {
                 setApps(count);
             }
         } catch (error) {
-            {error.code == 401 && navigate("/login")};
+            {error.code == "ERR_BAD_REQUEST" && navigate("/login")};
             console.error('Ошибка при загрузке данных:', error);
             notify({ message: "Ошибка при загрузке данных", type: "error", duration: 4200 });
         } finally {
@@ -143,69 +144,17 @@ export const TaskViewer = () => {
                                 ) : null}
                             </div>
                             <AutoTextarea>{task.description}</AutoTextarea>
-                            <div className="propblock taskblock-price">
-                                {task.budget_max !== task.budget_min ? (
-                                    <>
-                                        {task.budget_min} - {task.budget_max}
-                                        < img style={{ height: 22 + "px" }} src={rubleicon}></img>
-                                        <span style={{ fontSize: 17 + "px", paddingTop: 5 + "px" }}>за заказ</span>
-                                    </>
-                                ) : (
-                                    <>
-                                        {task.budget_max}
-                                        < img style={{ height: 22 + "px" }} src={rubleicon}></img>
-                                        <span style={{ fontSize: 17 + "px", paddingTop: 5 + "px" }}>за заказ</span>
-                                    </>
-                                )}
-                            </div>
-                            <div className="tblbottom">
-                                <div className={`propblock${task.status === "Закрытая" ? " black" : ""}`}>
-                                    {task.status === "Закрытая" ? (
-                                        <span style={{ color: "white", fontSize: "14px", fontWeight: 800 }}>{task.status}</span>
-                                    ) : task.status === "В процессе" ? (
-                                        <span style={{ color: "black", fontSize: "14px", fontWeight: 800 }}>{task.status}</span>
-                                    ) : task.status === "На рассмотрении модерацией" ? (
-                                        <>
-                                            <div
-                                                style={{
-                                                    width: "10px",
-                                                    height: "10px",
-                                                    background: "blue"
-                                                }}
-                                                className="ellipse"
-                                            />
-                                            <span style={{ color: "blue", fontSize: "14px", fontWeight: 800 }}>
-                                        {task.status}
-                                    </span>
-                                        </>
-                                        ) : (
-                                        <>
-                                            <div
-                                                style={{
-                                                    width: "10px",
-                                                    height: "10px",
-                                                    background: "limegreen"
-                                                }}
-                                                className="ellipse"
-                                            />
-                                            <span style={{ color: "limegreen", fontSize: "14px", fontWeight: 800 }}>
-                                        {task.status}
-                                    </span>
-                                        </>
-                                    )}
-                                </div>
-                            </div>
+                            <TaskBudjet bmin={task.budget_min} bmax={task.budget_max} view="max"/>
+                            <TaskStatus status={task.status}/>
                         </div>
                     </div>
                     <div className="taskblock">
                         {myuser.id === taskOwner.id && task.status !== "На рассмотрении модерацией" ? (
                             <div className="tbtop">
-                                {task.status === "Открытая" ? (
-                                    appcounter === 0 && (
-                                        <SimpleButton style="red" icon="x" onClick={handleTaskDelete}>
-                                            Удалить заказ
-                                        </SimpleButton>
-                                    )
+                                {task.status === "Открытая" || task.status === "Отклонена модерацией" ? (
+                                    <SimpleButton style="red" icon="x" onClick={handleTaskDelete}>
+                                        Удалить заказ
+                                    </SimpleButton>
                                 ) : (
                                     <div className="task-freelancerlinkfull">
                                         <span>{task.status === "В процессе" ? "В работе у" : "Заказ выполнил"}</span>

@@ -9,6 +9,8 @@ import ratingstar from "../../assets/ICONS/RATINGSTAR.svg";
 import {SERVER_URL} from "../../pathconfig.js";
 import AutoTextarea from "../other/AutoTextarea.jsx";
 import SimpleButton from "../SimpleButton.jsx";
+import TaskBudjet from "../tasks/TaskBudjet.jsx";
+import TaskStatus from "../tasks/TaskStatus.jsx";
 
 const Order = ({task}) => {
     const navigate = useNavigate();
@@ -81,7 +83,7 @@ const Order = ({task}) => {
         )
     }
 
-    const { diffresult, dayText, status } = CalcMinusDater(task.deadline);
+    const { diffresult, dayText } = CalcMinusDater(task.deadline);
 
     return (
         <div className={isDeleting ? "bodyblock fxrow deleting" : "bodyblock fxrow"}>
@@ -102,36 +104,8 @@ const Order = ({task}) => {
                         </div>
                     </div>
                     <AutoTextarea>{task.description}</AutoTextarea>
-                    <div className="taskblock-price">
-                        {task.budget_max !== task.budget_min ? (
-                            <>
-                                {task.budget_min} - {task.budget_max}
-                                < img style={{ height: 22 + "px" }} src={rubleicon}></img>
-                                <span style={{ fontSize: 17 + "px", paddingTop: 5 + "px" }}>за заказ</span>
-                            </>
-                        ) : (
-                            <>
-                                {task.budget_max}
-                                < img style={{ height: 22 + "px" }} src={rubleicon}></img>
-                                <span style={{ fontSize: 17 + "px", paddingTop: 5 + "px" }}>за заказ</span>
-                            </>
-                        )}
-                    </div>
-                    <div className="tblbottom">
-                        <div className={`propblock`}>
-                            <div
-                                style={{
-                                    width: "10px",
-                                    height: "10px",
-                                    background: "blue"
-                                }}
-                                className="ellipse"
-                            />
-                            <span style={{ color: "blue", fontSize: "14px", fontWeight: 800 }}>
-                                {task.status}
-                            </span>
-                        </div>
-                    </div>
+                    <TaskBudjet bmin={task.budget_min} bmax={task.budget_max} view={"max"}/>
+                    <TaskStatus status={task.status} />
                 </div>
             </div>
             <div className="taskblock">
