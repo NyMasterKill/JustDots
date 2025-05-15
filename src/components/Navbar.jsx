@@ -3,8 +3,6 @@ import {Link, useNavigate} from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import SimpleButton from './SimpleButton';
 import LogoContainer from './LogoContainer';
-import exampleimage from '../assets/UI/photoexample.jpg'
-import searchico from '../assets/ICONS/SEARCH.svg'
 import SimpleHatButton from './SimpleHatButton';
 import { SERVER_URL } from '../pathconfig.js';
 
@@ -25,7 +23,7 @@ const Navbar = () => {
                         {!isAuthenticated ?(
                             <>  {/* ШАПКА ПРИ АНОНИМЕ */}
                                 <Link style={{ textDecoration: 'none' }} to="/login">
-                                    <SimpleButton style={"white"}>Вход</SimpleButton>
+                                    <SimpleButton style={"white"} icon="right-to-bracket">Вход</SimpleButton>
                                 </Link>
                                 <Link style={{ textDecoration: 'none' }} to="/register">
                                     <SimpleButton style={"black"}>Регистрация</SimpleButton>
@@ -43,19 +41,19 @@ const Navbar = () => {
                                             <SimpleButton style="black" icon="plus">Создать заказ</SimpleButton>
                                         </Link>
                                     )}
-                                    <SimpleButton icon="arbitrage">Арбитраж</SimpleButton>
-                                    <SimpleButton style="accent" icon="support">Техн. поддержка</SimpleButton>
+                                    <SimpleButton icon="shield">Арбитраж</SimpleButton>
+                                    <SimpleButton style="accent" icon="headphones">Техн. поддержка</SimpleButton>
                                 </div>
                                 <Link style={{textDecoration: "none"}} to={"/mytasks"}>
-                                    <SimpleButton icon="order" title="Мои заказы">Мои заказы</SimpleButton>
+                                    <SimpleButton icon="bars" title="Мои заказы">Мои заказы</SimpleButton>
                                 </Link>
-                                <SimpleHatButton icon="messages">Сообщения</SimpleHatButton>
+                                <SimpleButton icon="envelope" title="Сообщения">Сообщения</SimpleButton>
                                 <Link style={{ textDecoration: 'none' }} to={"/profile/" + myuser.id} title='Мой профиль'>
                                     <div tabIndex={0} className='ellipse-profile miniep'>
                                         <img src={myuser.profile?.avatar_url ? `${SERVER_URL + myuser.profile?.avatar_url}` : null} />
                                     </div>
                                 </Link>
-                                <SimpleHatButton isActive="true" icon="logout" title="Выйти из аккаунта" onClick={handleLogout}></SimpleHatButton>
+                                <SimpleHatButton style="black" icon="power-off" title="Выйти из аккаунта" onClick={handleLogout}></SimpleHatButton>
                             </>
                         ) : (
                             <>
@@ -68,7 +66,7 @@ const Navbar = () => {
                                     </Link>
                                 </div>
                                 {myuser.username}
-                                <SimpleHatButton isActive="true" icon="logout" title="Выйти из аккаунта" onClick={handleLogout}></SimpleHatButton>
+                                <SimpleHatButton style="black" icon="power-off" title="Выйти из аккаунта" onClick={handleLogout}></SimpleHatButton>
                             </>
                     )}
                     </nav>

@@ -3,7 +3,6 @@ import { AuthContext } from '../context/AuthContext';
 import { useNotification } from '../context/Notifications.jsx';
 import { Navigate } from 'react-router-dom';
 import SimpleButton from '../components/SimpleButton.jsx';
-import Catcher from './Catcher.jsx';
 import InputorWLabel from './InputorWLabel';
 import Loader from './Loader.jsx';
 
@@ -45,7 +44,8 @@ const Login = () => {
     }
 
     return (
-        <div className='formbody'>
+        <>
+        <div className="formbody">
             <div className='formblock' >
                 <div className='formblock-title'>
                     Вход в аккаунт
@@ -57,6 +57,7 @@ const Login = () => {
                 </form>
             </div >
         </div>
+        </>
     );
 };
 

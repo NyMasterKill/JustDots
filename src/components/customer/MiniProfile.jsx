@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../../services/api";
 import { SERVER_URL } from "../../pathconfig";
-import ratingstar from "../../assets/ICONS/RATINGSTAR.svg";
+import Icon from "../other/Icon.jsx";
 
 export const MiniProfile = ({ id }) => {
     const [profile, setProfile] = useState({});
@@ -26,7 +26,8 @@ export const MiniProfile = ({ id }) => {
     return (
         <>
             <div className="miniprofile-white">
-                {profile.username}
+                {profile.username?.length > 5 ? `${profile.username?.slice(0, 6)}...` : profile?.username}
+                <div className="filler rev">
                 <div className="miniprofile-avatar">
                     {profile.profile?.avatar_url ? (
                         <img src={SERVER_URL + (profile?.profile?.avatar_url)}></img>
@@ -34,9 +35,11 @@ export const MiniProfile = ({ id }) => {
                         <div className="ellipse"> </div>
                     )}
                 </div>
+
                 <div className="propblock black">
-                    <img src={ratingstar}/>
+                    <Icon icon="star"/>
                     {profile.profile?.rating || 0.0}
+                </div>
                 </div>
             </div>
         </>

@@ -1,5 +1,5 @@
 import React from 'react';
-import rubleicon from "../../assets/ICONS/RUBLE.svg";
+import Icon from "../other/Icon.jsx";
 
 const TaskBudjet = ({bmin, bmax, view}) => {
     return (
@@ -7,13 +7,13 @@ const TaskBudjet = ({bmin, bmax, view}) => {
         {bmax !== bmin ? (
             <>
                 {bmin} - {bmax}
-                < img style={{ height: 22 + "px" }} src={rubleicon}></img>
+                <Icon icon="ruble-sign"></Icon>
                 <span style={{ fontSize: 17 + "px", paddingTop: 5 + "px" }}>за заказ</span>
             </>
         ) : (
             <>
                 {bmax}
-                < img style={{ height: 22 + "px" }} src={rubleicon}></img>
+                <Icon icon="ruble-sign"></Icon>
                 <span style={{ fontSize: 17 + "px", paddingTop: 5 + "px" }}>за заказ</span>
             </>
         )}

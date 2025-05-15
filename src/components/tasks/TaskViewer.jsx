@@ -7,15 +7,14 @@ import { CalcMinusDater } from '../../utils/CalcMinusDater.jsx';
 import { AutoTextarea } from "../other/AutoTextarea.jsx";
 import { SimpleButton } from "../SimpleButton.jsx";
 import { Link, useNavigate } from "react-router-dom";
-import ratingstar from '../../assets/ICONS/RATINGSTAR.svg'
 import { SERVER_URL } from "../../pathconfig.js";
 import Loader from '../Loader.jsx';
 import FeedbacksViewer from "../customer/FeedbacksViewer.jsx";
 import {getAppCounter} from "../../utils/AppCounter.jsx";
 import TaskBudjet from "./TaskBudjet.jsx";
 import TaskStatus from "./TaskStatus.jsx";
-import InputorWLabel from "../InputorWLabel.jsx";
 import MakeReview from "./MakeReview.jsx";
+import Icon from "../other/Icon.jsx";
 
 export const TaskViewer = () => {
     const navigate = useNavigate();
@@ -116,7 +115,7 @@ export const TaskViewer = () => {
         <>
             <div className='hatsaver'></div>
             <div className='blocktitle'>
-                <SimpleButton icon="backc" onClick={() => navigate(-1)}>Назад</SimpleButton>
+                <SimpleButton icon="arrow-left" onClick={() => navigate(-1)}>Назад</SimpleButton>
                 заказ #{task.id}
                 <SimpleButton style="black" onClick={() => console.log(task)}>DEBUG: Получить тело задачи (console)</SimpleButton>
             </div>
@@ -153,7 +152,7 @@ export const TaskViewer = () => {
                         {myuser.id === taskOwner.id && task.status !== "На рассмотрении модерацией" ? (
                             <div className="tbtop">
                                 {task.status === "Открытая" || task.status === "Отклонена модерацией" ? (
-                                    <SimpleButton style="red" icon="x" onClick={handleTaskDelete}>
+                                    <SimpleButton style="red" icon="trash" onClick={handleTaskDelete}>
                                         Удалить заказ
                                     </SimpleButton>
                                 ) : (
@@ -185,7 +184,7 @@ export const TaskViewer = () => {
                                                 ) : (<div/>)}
                                             </div>
                                             <div className="propblock black">
-                                                <img src={ratingstar} alt="Рейтинг" />
+                                                <Icon icon="star"/>
                                                 {taskOwner.profile?.rating || "0.0"}
                                             </div>
                                         </div>
@@ -194,14 +193,14 @@ export const TaskViewer = () => {
                             </div>
                         ) : task.status === "На рассмотрении модерацией" && (
                             <div className="tbtop">
-                                <SimpleButton style="red" icon="x" onClick={handleTaskDelete}>
+                                <SimpleButton style="red" icon="trash" onClick={handleTaskDelete}>
                                     Удалить заказ
                                 </SimpleButton>
                             </div>
                         )}
                         {myuser.user_type == "freelancer" ? (
                             <div className="tbbottom">
-                                <SimpleButton style="accent" onClick={handleSendApp}>
+                                <SimpleButton icon="user" style="accent" onClick={handleSendApp}>
                                     Откликнуться
                                 </SimpleButton>
                             </div>

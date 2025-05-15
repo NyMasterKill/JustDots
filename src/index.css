@@ -1,10 +1,11 @@
 :root {
     --variable-collection-accent: rgba(119, 166, 172, 1);
-    --variable-collection-black: rgba(0, 0, 0, 1);
-    --variable-collection-white: rgba(255, 255, 255, 1);
+    --variable-collection-black: rgb(0, 0, 0);
+    --variable-collection-white: rgb(255, 255, 255);
     --variable-collection-border: rgba(0, 0, 0, 0.15);
-    --variable-collection-shadow: rgba(0, 0, 0, 0.144);
-    --mainbackground: #fff;
+    --variable-collection-shadow: rgba(0, 0, 0, 0.15);
+    --mainbackground: #ffffff;
+    --hat: rgba(255, 255, 255, 0.54);
 }
 
 #root {
@@ -30,7 +31,7 @@ body {
     /* outline: 1px solid red; */
     position: fixed;
     top: 0;
-    background: rgba(255, 255, 255, 0.541);
+    background: var(--hat);
     z-index: 1000;
     backdrop-filter: blur(10px);
 }
@@ -127,12 +128,12 @@ body {
     gap: 5px;
     height: 40px;
     min-width: fit-content;
-    background: var(--variable-collection-black);
+    background: black;
     border: 1px solid var(--variable-collection-border);
     border-radius: 12px;
     font-size: 16px;
     font-family: Ubuntu;
-    color: var(--variable-collection-white);
+    color: white;
     padding: 0px 15px;
     font-weight: 500;
     box-shadow: 0px 2px 8px var(--variable-collection-shadow);
@@ -152,7 +153,7 @@ body {
     border-radius: 12px;
     font-size: 16px;
     font-family: Ubuntu;
-    color: var(--variable-collection-white);
+    color: white;
     padding: 0px 15px;
     font-weight: 500;
     box-shadow: 0px 2px 8px var(--variable-collection-shadow);
@@ -172,7 +173,7 @@ body {
     border-radius: 12px;
     font-size: 16px;
     font-family: Ubuntu;
-    color: var(--variable-collection-white);
+    color: white;
     padding: 0px 15px;
     font-weight: 500;
     box-shadow: 0px 2px 8px var(--variable-collection-shadow);
@@ -278,9 +279,8 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    background: url("./assets/background.jpg");
+    background: url("./assets/background.svg");
     background-size: cover;
-    overflow: auto;
 }
 
 .formblock {
@@ -320,6 +320,8 @@ body {
 }
 
 .Inputor {
+    background: var(--variable-collection-white);
+    color: var(--variable-collection-black);
     min-width: 240px;
     height: 38px;
     font-size: 18px;
@@ -481,6 +483,7 @@ body {
     font-weight: 800;
     padding: 5px 50px;
     text-shadow: 0px 4px 8px var(--variable-collection-shadow);
+    color: var(--variable-collection-black);
 }
 
 .bodyblock {
@@ -495,6 +498,7 @@ body {
     display: flex;
     flex-direction: column;
     border: 1px solid var(--variable-collection-border);
+    color: var(--variable-collection-black);
 }
 
 .filler {
@@ -529,7 +533,7 @@ body {
     background-size: 35%;
     border-radius: 9999px;
     background-repeat: no-repeat;
-    background-image: url("./assets/ICONS/DOWNLOAD.svg");
+    background-image: url("./assets/UI/DOWNLOAD.svg");
     background-color: rgba(0, 0, 0, 0.233);
     backdrop-filter: blur(2px);
     cursor: pointer;
@@ -537,6 +541,7 @@ body {
     z-index: 50;
     transition: 150ms ease-in-out;
 }
+
 
 .ellipse-hoverer:hover {
     opacity: 100%;
@@ -604,6 +609,7 @@ body {
     justify-content: center;
     align-items: center;
     gap: 5px;
+    color: var(--variable-collection-black);
     border: 1px solid var(--variable-collection-border);
     box-shadow: 0px 4px 8px var(--variable-collection-shadow);
     padding: 4px 8px;
@@ -612,7 +618,7 @@ body {
 
 .black {
     background: var(--variable-collection-black);
-    color: white;
+    color: var(--variable-collection-white);
 }
 
 .accent {
@@ -840,9 +846,10 @@ form {
 
 .taskblock-price {
     font-size: 23px;
-    font-weight: 500;
+    font-weight: 800;
     display: flex;
     align-items: center;
+    gap: 5px;
 }
 
 .taskblock-infoprops {
@@ -993,19 +1000,24 @@ form {
     align-items: center;
     gap: 5px;
     background: black;
-    color: white;
+    color: var(--variable-collection-white);
     padding: 10px;
     border-radius: 24px;
     font-size: 18px;
     transition: all 150ms ease-in-out;
 }
 
+.rev{
+    justify-content: right;
+}
+
 .miniprofile-white {
+    width: 180px;
     display: flex;
     align-items: center;
     gap: 5px;
     background: white;
-    color: black;
+    color: var(--variable-collection-black);
     padding: 10px;
     border-radius: 24px;
     font-size: 18px;

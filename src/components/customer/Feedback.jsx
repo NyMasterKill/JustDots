@@ -1,13 +1,10 @@
 import { useEffect, useState } from "react";
-import { AuthContext } from '../../context/AuthContext.jsx';
 import api from '../../services/api';
-import { SERVER_URL } from "../../pathconfig.js";
 import MiniProfile from "./MiniProfile.jsx";
 import { Link } from "react-router-dom";
 import SimpleButton from "../SimpleButton.jsx";
-import SimpleHatButton from "../SimpleHatButton.jsx";
-import rubleicon from "../../assets/ICONS/RUBLE.svg";
 import {useNotification} from "../../context/Notifications.jsx";
+import Icon from "../other/Icon.jsx";
 
 export const Feedback = ({ taskid, onAction, closing }) => {
     const [feedbacks, setFeedbacks] = useState([]);
@@ -72,10 +69,10 @@ export const Feedback = ({ taskid, onAction, closing }) => {
                     <div className="feedbackint filler">
                         <div className="propblock fbp">
                             {feedback.proposed_price}
-                            <img src={rubleicon} style={{height: 20 + "px"}} />
+                            <Icon icon="ruble-sign"/>
                         </div>
-                        <SimpleButton style="accent" onClick={() => {feedbackAccept(feedback.id); onAction?.();}}>Принять</SimpleButton>
-                        <SimpleButton style="black"  onClick={() => {feedbackReject(feedback.id); onAction?.();}}>Отклонить</SimpleButton>
+                        <SimpleButton icon="check" style="accent" onClick={() => {feedbackAccept(feedback.id); onAction?.();}}>Принять</SimpleButton>
+                        <SimpleButton icon="xmark" style="black"  onClick={() => {feedbackReject(feedback.id); onAction?.();}}>Отклонить</SimpleButton>
                     </div>
                 </div>
             ))}

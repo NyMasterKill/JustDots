@@ -1,16 +1,14 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, { useEffect, useState} from 'react';
 import {Link, useNavigate} from "react-router-dom";
-import {AuthContext} from "../../context/AuthContext.jsx";
 import {useNotification} from "../../context/Notifications.jsx";
 import api from "../../services/api.jsx";
 import {CalcMinusDater} from "../../utils/CalcMinusDater.jsx";
-import rubleicon from "../../assets/ICONS/RUBLE.svg";
-import ratingstar from "../../assets/ICONS/RATINGSTAR.svg";
 import {SERVER_URL} from "../../pathconfig.js";
 import AutoTextarea from "../other/AutoTextarea.jsx";
 import SimpleButton from "../SimpleButton.jsx";
 import TaskBudjet from "../tasks/TaskBudjet.jsx";
 import TaskStatus from "../tasks/TaskStatus.jsx";
+import Icon from "../other/Icon.jsx";
 
 const Order = ({task}) => {
     const navigate = useNavigate();
@@ -121,7 +119,7 @@ const Order = ({task}) => {
                                     ) : (<div/>)}
                                 </div>
                                 <div className="propblock black">
-                                    <img src={ratingstar} alt="Рейтинг" />
+                                    <Icon icon="star"/>
                                     {taskOwner.profile?.rating || "0.0"}
                                 </div>
                             </div>
@@ -129,10 +127,10 @@ const Order = ({task}) => {
                     </div>
                 </div>
                 <div className="tbbottom">
-                    <SimpleButton style="green" onClick={Accept}>
+                    <SimpleButton icon="check" style="green" onClick={Accept}>
                         Принять
                     </SimpleButton>
-                    <SimpleButton style="red" onClick={Decline}>
+                    <SimpleButton icon="xmark" style="red" onClick={Decline}>
                         Отклонить
                     </SimpleButton>
                 </div>

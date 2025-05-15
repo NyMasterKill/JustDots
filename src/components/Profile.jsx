@@ -4,18 +4,16 @@ import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import Loader from './Loader.jsx';
 import { AuthContext } from '../context/AuthContext.jsx';
-import ratingstar from '../assets/ICONS/RATINGSTAR.svg'
-import simpleuser from '../assets/ICONS/SIMPLEUSER.svg'
-import timestamp from '../assets/ICONS/TIMESTAMP.svg'
 import SimpleButton from './SimpleButton.jsx';
 import { CalcDater } from '../utils/CalcDater.jsx';
 import { SERVER_URL } from '../pathconfig.js';
+import Icon from "./other/Icon.jsx";
 
 const Profile = () => {
     const { id } = useParams();
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+
     const { myuser } = useContext(AuthContext);
     const notify = useNotification();
     const navigate = useNavigate();
@@ -138,7 +136,7 @@ const Profile = () => {
                                 )
                             }
                             <div className={"propblock black"}>
-                                <img src={ratingstar} alt="" />
+                                <Icon icon="star"></Icon>
                                 {profile.profile.rating || "0.0"}
                             </div>
                             <div className='propblock accent'>
@@ -147,11 +145,11 @@ const Profile = () => {
                         </div>
                         <div className='profile-info-sub'>
                             <div className='simplepropblock'>
-                                <img style={{ height: 20 + "px" }} src={simpleuser} alt="simpleuser" />
+                                <Icon icon="circle-user"/>
                                 {profile.last_name} {profile.first_name} {profile.patronymic}
                             </div>
                             <div className='simplepropblock'>
-                                <img style={{ height: 20 + "px" }} src={timestamp} alt="timestamp" />
+                                <Icon icon="calendar"/>
                                 на justdots {daysDiff} {dayText}
                             </div>
                         </div>

@@ -2,7 +2,6 @@ import React, { useState, useContext } from 'react';
 import { useNotification } from '../context/Notifications.jsx';
 import SimpleButton from '../components/SimpleButton.jsx';
 import InputorWLabel from './InputorWLabel';
-import Catcher from './Catcher.jsx';
 import { AuthContext } from '../context/AuthContext.jsx';
 import { Navigate, useNavigate } from 'react-router-dom';
 import Loader from './Loader.jsx';

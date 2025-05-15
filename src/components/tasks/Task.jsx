@@ -1,15 +1,14 @@
 import { useEffect, useState, useContext } from "react";
-import rubleicon from "../../assets/ICONS/RUBLE.svg";
 import { AuthContext } from '../../context/AuthContext.jsx';
 import api from '../../services/api.jsx';
 import { CalcMinusDater } from '../../utils/CalcMinusDater.jsx';
 import { Link, useNavigate } from "react-router-dom";
 import { SimpleButton } from "../SimpleButton.jsx";
 import { useNotification } from '../../context/Notifications.jsx';
-import ratingstar from '../../assets/ICONS/RATINGSTAR.svg';
 import {getAppCounter} from "../../utils/AppCounter.jsx";
 import TaskStatus from "./TaskStatus.jsx";
 import TaskBudjet from "./TaskBudjet.jsx";
+import Icon from "../other/Icon.jsx";
 
 export const Task = ({ task }) => {
     const navigate = useNavigate();
@@ -108,6 +107,7 @@ export const Task = ({ task }) => {
                         {task.status === "Открытая" || task.status === "Отклонена модерацией" ? (
                             <SimpleButton
                                 style="red"
+                                icon="trash"
                                 onClick={handleTaskDelete}
                                 disabled={isDeleting}
                             >
@@ -131,7 +131,7 @@ export const Task = ({ task }) => {
                     <div className="tbtop">
                         <div className="propblock">{taskOwner?.username}</div>
                         <div className="propblock black">
-                            <img src={ratingstar} alt="Рейтинг" />
+                            <Icon icon="star"/>
                             {taskOwner.profile?.rating || "0.0"}
                         </div>
                     </div>
@@ -139,7 +139,7 @@ export const Task = ({ task }) => {
                     <div className="tbtop">
                         <SimpleButton
                         style="red"
-                        icon="x"
+                        icon="trash"
                         onClick={handleTaskDelete}
                         disabled={isDeleting}
                         >
@@ -152,6 +152,7 @@ export const Task = ({ task }) => {
                         <SimpleButton
                             style={appcounter > 0 ? "white butcounter" : "white"}
                             data-count={appcounter}
+                            onClick={() => navigate(`/task/${task.id}`)}
                         >
                             Заявки
                         </SimpleButton>
