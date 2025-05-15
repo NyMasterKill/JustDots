@@ -12,7 +12,6 @@ const AutoResizeTextarea = () => {
 
     useEffect(() => {
         adjustHeight();
-        // Добавляем обработчик на случай изменения значения извне
         const textarea = textareaRef.current;
         textarea?.addEventListener('input', adjustHeight);
         return () => textarea?.removeEventListener('input', adjustHeight);
@@ -21,8 +20,11 @@ const AutoResizeTextarea = () => {
     return { textareaRef, adjustHeight };
 };
 
-export const AutoTextarea = ({ children }) => {
+export const AutoTextarea = ({fSize, children }) => {
     const { textareaRef } = AutoResizeTextarea();
+    let textSize = '16px';
+
+    if(fSize) {textSize = fSize};
 
     return (
         <textarea
@@ -34,7 +36,8 @@ export const AutoTextarea = ({ children }) => {
             style={{
                 resize: 'none',
                 overflow: 'hidden',
-                minHeight: '50px',
+                minHeight: '5px',
+                fontSize: `${textSize}`,
                 background: '#00000000'
             }}
             disabled

@@ -15,6 +15,7 @@ import TaskBudjet from "./TaskBudjet.jsx";
 import TaskStatus from "./TaskStatus.jsx";
 import MakeReview from "./MakeReview.jsx";
 import Icon from "../other/Icon.jsx";
+import ReviewViewer from "./ReviewViewer.jsx";
 
 export const TaskViewer = () => {
     const navigate = useNavigate();
@@ -199,30 +200,43 @@ export const TaskViewer = () => {
                             </div>
                         )}
                         {myuser.user_type == "freelancer" ? (
-                            <div className="tbbottom">
-                                <SimpleButton icon="user" style="accent" onClick={handleSendApp}>
-                                    Откликнуться
-                                </SimpleButton>
-                            </div>
+                            <>
+                                {task.status == "Открытая" && (
+                                <div className="tbbottom">
+                                    <SimpleButton icon="user" style="accent" onClick={handleSendApp}>
+                                        Откликнуться
+                                    </SimpleButton>
+                                </div>
+                                )}
+                            </>
                         ) : (
                             <div className="tbbottom">
-                                {task.status == "В процессе" ? (
+                                {task.status == "В процессе" && (
                                     <SimpleButton style="accent" onClick={handleConfirmTask}>
                                         Подтвердить выполнение заказа
                                     </SimpleButton>
-                                ) : (
-                                    null
                                 )}
                             </div>
                         )}
                     </div>
-
                 </div>
+
+                {task.status == "Закрытая" && (
+                    <ReviewViewer taskOwner={taskOwner} taskFreelancer={taskFreelancer} task={task} myuser={myuser}/>
+                )}
+
                 {task.status == "Открытая" && myuser.user_type !== "freelancer" ? (
                     <FeedbacksViewer task={task} user={myuser.user_type} onConfirm={handleConfirm}></FeedbacksViewer>
                 ) : null}
-                {task.status == "Закрытая" && (
-                    <MakeReview task={task} taskowner={taskOwner} taskfreelancer={taskFreelancer}/>
+
+                {task.status === "Закрытая" && (
+                    <>
+                        {taskOwner.id === myuser.id && !task.customer_review ?(
+                            <MakeReview task={task} taskowner={taskOwner} taskfreelancer={taskFreelancer}/>
+                        ) : taskFreelancer.id === myuser.id && !task.freelancer_review && (
+                            <MakeReview task={task} taskowner={taskOwner} taskfreelancer={taskFreelancer}/>
+                        )}
+                    </>
                 )}
             </div >
         </>

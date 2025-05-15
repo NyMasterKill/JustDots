@@ -41,8 +41,6 @@ const Navbar = () => {
                                             <SimpleButton style="black" icon="plus">Создать заказ</SimpleButton>
                                         </Link>
                                     )}
-                                    <SimpleButton icon="shield">Арбитраж</SimpleButton>
-                                    <SimpleButton style="accent" icon="headphones">Техн. поддержка</SimpleButton>
                                 </div>
                                 <Link style={{textDecoration: "none"}} to={"/mytasks"}>
                                     <SimpleButton icon="bars" title="Мои заказы">Мои заказы</SimpleButton>
