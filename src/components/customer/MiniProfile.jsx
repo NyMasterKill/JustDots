@@ -37,7 +37,7 @@ export const MiniProfile = ({ id }) => {
                 </div>
 
                 <div className="propblock black">
-                    <Icon icon="star"/>
+                    <Icon icon="star" color="gold"/>
                     {profile.profile?.rating || 0.0}
                 </div>
                 </div>

@@ -45,8 +45,8 @@ export const AuthProvider = ({ children }) => {
                 patronymic,
                 email,
                 bio: "Тут пусто",
-                skills: [{ name: "test" }],
-                portfolio: [{ title: "test", description: "test", url: "test" }]
+                skills: [],
+                portfolio: []
             };
 
             await api.put('/users/profile/update', profileData);
@@ -63,7 +63,7 @@ export const AuthProvider = ({ children }) => {
         if (myuser && !myuser.profile) {
             autoProfileUpdater();
         }
-    }, [myuser]); // Добавляем myuser в зависимости
+    }, [myuser]);
 
     const login = async (username, password) => {
         try {

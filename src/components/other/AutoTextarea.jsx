@@ -35,6 +35,7 @@ export const AutoTextarea = ({ children }) => {
                 resize: 'none',
                 overflow: 'hidden',
                 minHeight: '50px',
+                background: '#00000000'
             }}
             disabled
         />

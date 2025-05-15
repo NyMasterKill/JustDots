@@ -131,7 +131,7 @@ export const Task = ({ task }) => {
                     <div className="tbtop">
                         <div className="propblock">{taskOwner?.username}</div>
                         <div className="propblock black">
-                            <Icon icon="star"/>
+                            <Icon icon="star" color="gold"/>
                             {taskOwner.profile?.rating || "0.0"}
                         </div>
                     </div>

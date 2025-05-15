@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNotification } from '../context/Notifications.jsx';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/api';
@@ -8,58 +8,18 @@ import SimpleButton from './SimpleButton.jsx';
 import { CalcDater } from '../utils/CalcDater.jsx';
 import { SERVER_URL } from '../pathconfig.js';
 import Icon from "./other/Icon.jsx";
+import ProfileEditor from "./ProfileEditor.jsx";
+import AutoTextarea from "./other/AutoTextarea.jsx";
 
 const Profile = () => {
     const { id } = useParams();
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
-
+    const [changemode, setChangeMode] = useState(false);
     const { myuser } = useContext(AuthContext);
     const notify = useNotification();
     const navigate = useNavigate();
-
-    const handleAvatarUploader = async (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        const MAX_SIZE = 5 * 1024 * 1024;
-        if (!['image/jpeg', 'image/png'].includes(file.type) || file.size > MAX_SIZE) {
-            notify({
-                message: 'Файл должен быть JPG/PNG (макс. 5MB)',
-                type: "error",
-                duration: 4200
-            });
-            return;
-        }
-
-        setLoading(true);
-
-        try {
-            const formData = new FormData();
-            formData.append('avatar', file);
-
-            const response = await api.put("/users/profile/avatar", formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            });
-
-            notify({
-                message: "Аватар обновлен!",
-                type: "success",
-                duration: 3000
-            });
-
-        } catch (err) {
-            notify({
-                message: err.response?.data?.message || "Ошибка загрузки",
-                type: "error",
-                duration: 4200
-            });
-        } finally {
-            setLoading(false);
-        }
-    }
+    const [isUpdated, setUpdate] = useState(false);
 
     useEffect(() => {
         const Fetcher = async () => {
@@ -79,13 +39,26 @@ const Profile = () => {
             }
         };
         Fetcher();
-    }, [id])
+    }, [id, isUpdated, changemode])
+
+    const refreshProfile = () => {
+        setUpdate(true);
+        reChangeMode();
+    }
+
+    const changeMode = () =>{
+        setChangeMode(true);
+    }
+    const reChangeMode = () => {
+        setChangeMode(false);
+    }
 
     if (loading) {
         return <Loader></Loader>
     }
+    if(!profile) return;
 
-
+    if(changemode) return <ProfileEditor profile={profile} action={reChangeMode} onsub={refreshProfile}></ProfileEditor>
 
     const { daysDiff, dayText } = CalcDater(profile.created_at);
     return (
@@ -97,20 +70,7 @@ const Profile = () => {
             <div className='bodyblock'>
                 <div className='filler'>
                     <div className='ellipse-profile'>
-                        {profile && profile.id === myuser.id ? (
-                            <>
-                                <input style={{ display: "none" }} type="file" accept=".jpg,.jpeg,.png" id="profileimguploader" onChange={handleAvatarUploader}></input>
-                                <label htmlFor='profileimguploader' title='Нажмите чтобы загрузить новое фото' className='ellipse-hoverer' />
-                                <img
-                                    className='iph'
-                                    src={myuser.profile?.avatar_url ? `${SERVER_URL + profile.profile?.avatar_url}` : null}
-                                />
-                            </>
-                        ) : (
-                            <>
-                                <img src={profile.profile?.avatar_url ? `${SERVER_URL + profile.profile?.avatar_url}` : null} />
-                            </>
-                        )}
+                        <img src={profile.profile?.avatar_url ? `${SERVER_URL + profile.profile?.avatar_url}` : null} />
                     </div>
                     <div className='profile-info'>
                         <div className='profile-info-name'>
@@ -136,8 +96,8 @@ const Profile = () => {
                                 )
                             }
                             <div className={"propblock black"}>
-                                <Icon icon="star"></Icon>
-                                {profile.profile.rating || "0.0"}
+                                <Icon icon="star" color="gold"></Icon>
+                                {profile.profile.rating || "0"}
                             </div>
                             <div className='propblock accent'>
                                 {profile.completed_tasks_count} {profile.user_type == "freelancer" ? "выполненных" : "завершённых"} заказов
@@ -156,7 +116,7 @@ const Profile = () => {
                     </div>
                     <div className='profile-edit-container'>
                         {myuser.id == profile.id ? (
-                            <SimpleButton icon='edit'>Редактировать профиль</SimpleButton>
+                            <SimpleButton icon='edit' onClick={changeMode}>Редактировать профиль</SimpleButton>
                         ) : (
                             null
                         )}
@@ -166,15 +126,17 @@ const Profile = () => {
                     Обо мне
                 </div>
                 <div className='textblock'>
-                    {profile.profile?.bio || "Тут пусто"}
+                    <AutoTextarea>{profile.profile.bio}</AutoTextarea>
                 </div>
             </div>
-            <div className='bodyblock'>
+            <div className='bodyblock gap5'>
                 <div className='titleblock'>
                     Навыки
                 </div>
-                <div className='textblock'>
-                    Тут пусто
+                <div className='skillsflex'>
+                    {profile.skills.map((skill, index) => (
+                        <div key={index} className="propblock black">{skill.name}</div>
+                    ))}
                 </div>
                 <div style={{ paddingTop: 25 + "px" }} className='titleblock'>
                     Портфолио

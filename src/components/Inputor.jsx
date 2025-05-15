@@ -1,12 +1,10 @@
-import { useState } from "react";
-
-export const Inputor = ({ typea, onChange, ...props }) => {
+export const Inputor = ({ size, typea, onChange, ...props }) => {
     return (
         <>
             {typea == "textarea" ? (
                 <textarea className="Inputor txtarea" onChange={onChange} {...props}></textarea>
             ) : (
-                <input className="Inputor" onChange={onChange} {...props} />
+                <input className={size ? "Inputor iprsmall" : "Inputor"} onChange={onChange} {...props} />
             )}
         </>
     );

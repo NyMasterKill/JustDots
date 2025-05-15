@@ -1,20 +1,28 @@
-import { useContext } from 'react';
+import {useContext, useEffect} from 'react';
 import { AuthContext } from '../../context/AuthContext';
-import { Navigate, Outlet } from 'react-router-dom';
+import {Navigate, Outlet, useNavigate} from 'react-router-dom';
 import Loader from '../Loader.jsx';
+import {useNotification} from "../../context/Notifications.jsx";
+
 
 export const Moderator = () => {
-    const {myuser, isAuthenticated, loading } = useContext(AuthContext);
+    const {myuser, loading } = useContext(AuthContext);
+    const navigate = useNavigate();
+    const notify = useNotification();
 
-    if(myuser?.user_type !== "moderator") return (
-        <Navigate to={`/profile/${myuser?.id}`}></Navigate>
-    );
+    useEffect(() => {
+        if (myuser && myuser.user_type !== "moderator") {
+            notify({
+                message: "Отказано в доступе",
+                type: "error",
+                duration: 4200
+            });
+            navigate(-1);
+        }
+    }, [myuser, navigate, notify]);
 
     if (loading) {
         return <Loader></Loader>
-    }
-    if (!isAuthenticated) {
-        return <Navigate to="/login" />
     }
 
     return (
