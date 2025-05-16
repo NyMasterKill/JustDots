@@ -10,7 +10,7 @@ import TaskStatus from "./TaskStatus.jsx";
 import TaskBudjet from "./TaskBudjet.jsx";
 import Icon from "../other/Icon.jsx";
 
-export const Task = ({ task }) => {
+export const Task = ({ task, trigger }) => {
     const navigate = useNavigate();
     const { myuser } = useContext(AuthContext);
     const [loading, setLoading] = useState(true);
@@ -48,7 +48,7 @@ export const Task = ({ task }) => {
             }
         };
         handleTaskFetch();
-    }, [task]);
+    }, [task, trigger]);
 
 
     const handleTaskDelete = async () => {

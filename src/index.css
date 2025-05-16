@@ -1250,6 +1250,7 @@ form {
 .message-author-name{
     display: flex;
     align-items: center;
+    color: var(--variable-collection-black);
     gap: 5px;
     font-size: 18px;
     font-weight: 500;
@@ -1265,6 +1266,10 @@ form {
     box-shadow: 0px 4px 8px var(--variable-collection-shadow);
     font-size: 16px;
     font-weight: 500;
+}
+
+.fs16{
+    font-size: 16px;
 }
 
 .message-avatar-container{

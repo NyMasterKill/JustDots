@@ -153,6 +153,10 @@ export const TaskViewer = () => {
         setConfirm(true);
     }
 
+    const debugTaskID = () => {
+        console.debug(task);
+    }
+
     if (loading) {
         return (
             <Loader />
@@ -167,6 +171,7 @@ export const TaskViewer = () => {
             <div className='blocktitle'>
                 <SimpleButton icon="arrow-left" onClick={() => navigate(-1)}>Назад</SimpleButton>
                 заказ #{task.id}
+                <SimpleButton icon="code" onClick={debugTaskID}>DBG: taskID</SimpleButton>
             </div>
             <div className="bodyblock gap10">
                 <div className="bodyblock fxrow">

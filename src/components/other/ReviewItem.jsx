@@ -37,7 +37,7 @@ const ReviewItem = ({item}) => {
                 </div>
                 <div className="message-data">
                     <div className="message-author-name">
-                        <Link style={{textDecoration: "none"}} to={`/profile/${author.id}`}>
+                        <Link style={{textDecoration: "none", color: "var(--variable-collection-black)"}} to={`/profile/${author.id}`}>
                             {author.username}
                         </Link>
                     </div>
