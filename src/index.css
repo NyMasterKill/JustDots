@@ -29,7 +29,6 @@ body {
     height: min-content;
     display: flex;
     justify-content: center;
-    /* outline: 1px solid red; */
     position: fixed;
     top: 0;
     background: var(--hat);
@@ -163,7 +162,7 @@ body {
     align-items: center;
     gap: 5px;
     height: 40px;
-    min-width: 124px;
+    min-width: fit-content;
     background: var(--variable-collection-accent);
     border: 1px solid var(--variable-collection-border);
     border-radius: 12px;
@@ -1149,7 +1148,7 @@ form {
 
 .feedbackcom{
     font-size: 16px;
-    font-weight: 400;
+    font-weight: 500;
     min-width: fit-content;
 }
 

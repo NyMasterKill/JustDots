@@ -14,6 +14,8 @@ import { Freelancer } from './components/layouts/Freelancer';
 import { PublicTasks } from './components/freelancer/PublicTasks.jsx';
 import {Moderator} from "./components/layouts/Moderator.jsx";
 import ModerateOrders from "./components/moderator/ModerateOrders.jsx";
+import Loader from "./components/Loader.jsx";
+import Landing from "./components/Landing.jsx";
 
 const App = () => {
   return (
@@ -22,6 +24,7 @@ const App = () => {
         <Router>
           <Navbar />
           <Routes>
+            <Route path="/" element={<Landing/>}/>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route element={<Main />}>

@@ -109,9 +109,6 @@ const Profile = () => {
                     <div className='profile-info'>
                         <div className='profile-info-name'>
                             <span>{profile.username}</span>
-                            <div className='ellipse'></div>
-                            <div className='ellipse'></div>
-                            <div className='ellipse'></div>
                         </div>
                         <div className='profile-info-work'>
                             {profile.user_type == "customer" ?
@@ -173,11 +170,13 @@ const Profile = () => {
                         {sortMethod ? "Сначала положительные" : "Сначала отрицательные"}
                     </SimpleButton>
                 </div>
-                <div className="textblock bfxcol gap10">
-                    {sortedReviews?.map((review, index) => (
-                        <ReviewItem key={index} item={review}></ReviewItem>
-                    ))}
-                </div>
+                {profileReviews.length > 0 &&(
+                    <div className="textblock bfxcol gap10">
+                        {sortedReviews?.map((review, index) => (
+                            <ReviewItem key={index} item={review}></ReviewItem>
+                        ))}
+                    </div>
+                )}
             </div>
         </>
     );

@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from 'react';
-import AutoTextarea from "./AutoTextarea.jsx";
 import Icon from "./Icon.jsx";
 import api from "../../services/api.jsx";
 import {SERVER_URL} from "../../pathconfig.js";

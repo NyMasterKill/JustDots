@@ -2,6 +2,7 @@ import { Task } from "../tasks/Task.jsx"
 import { useState, useEffect } from "react";
 import api from "../../services/api.jsx";
 import {useNavigate} from "react-router-dom";
+import SimpleButton from "../SimpleButton.jsx";
 
 export const PublicTasks = () => {
     const [tasks, setTasks] = useState([]);
@@ -34,33 +35,23 @@ export const PublicTasks = () => {
         )
     }
 
-    if (error) {
-        return (
-            <>
-                <div className="hatsaver"></div>
-                <div>Ошибка: {error.message || "неизвестная"}</div>
-            </>
-        )
-    }
-
-    if (tasks.length === 0) {
-        return (
-            <>
-                <div className="hatsaver"></div>
-                <div className="blocktitle">лента заказов</div>
-                <div>тут пусто</div>
-            </>
-        )
-    }
-
     return (
         <>
             <div className="hatsaver"></div>
             <div className="blocktitle">лента заказов</div>
             <div className="bodyblock gap10">
-                {tasks.map((task) => (
-                    <Task key={task.id} task={task} />
-                ))}
+                <div className="bfxrow gap5">
+                    <SimpleButton style="black" icon="sort">Сортировать по</SimpleButton>
+                    <SimpleButton style="black" icon="filter">Фильтр</SimpleButton>
+                    <SimpleButton style="accent" icon="refresh"></SimpleButton>
+                </div>
+            {tasks.length > 0 ? (
+                <>
+                    {tasks.map((task) => (
+                        <Task key={task.id} task={task} />
+                    ))}
+                </>
+            ) : "новых заказов нет"}
             </div>
         </>
 

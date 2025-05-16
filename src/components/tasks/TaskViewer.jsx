@@ -16,6 +16,7 @@ import TaskStatus from "./TaskStatus.jsx";
 import MakeReview from "./MakeReview.jsx";
 import Icon from "../other/Icon.jsx";
 import ReviewViewer from "./ReviewViewer.jsx";
+import Inputor from "../Inputor.jsx";
 
 export const TaskViewer = () => {
     const navigate = useNavigate();
@@ -28,6 +29,14 @@ export const TaskViewer = () => {
     const [taskFreelancer, setTaskFreelancer] = useState({});
     const [appcounter, setApps] = useState(0);
     const [isConfirmed, setConfirm] = useState(false);
+
+    const [matchedApp, setMatchedApp] = useState({});
+    const [myApps, setMyApps] = useState([]);
+    const [isApped, setApp] = useState(false);
+    const [appText, setAppText] = useState("");
+    const [appPrice, setAppPrice] = useState(null);
+
+    const [isUpdate, setUpdate] = useState(false);
 
     const handleTaskFetch = async () => {
         if (!myuser) return;
@@ -60,7 +69,28 @@ export const TaskViewer = () => {
 
     useEffect(() => {
         handleTaskFetch();
-    }, [id, isConfirmed]);
+    }, [id, isConfirmed, isUpdate]);
+
+
+    useEffect(() => {
+        const fetchAppsAndCheck = async () => {
+            if(myuser === "customer" || !task) return;
+            try{
+                const response = await api.get('/tasks/tasks/applications');
+                const found = response.data.some(app => app.task_id === task.id);
+                const match = response.data.find(app => app.task_id === task.id);
+                setMatchedApp(match);
+                setApp(found);
+                console.log(found);
+            }
+            catch(error){
+                console.error(error);
+            }
+        }
+
+        fetchAppsAndCheck();
+    }, [task, myuser, isUpdate])
+
 
     const handleTaskDelete = async () => {
         try {
@@ -89,15 +119,34 @@ export const TaskViewer = () => {
     }
 
     const handleSendApp = async () => {
+        if(isApped) return (notify({message: "Вы уже оставили заявку на данный заказ", type: "info", duration: 4200}));
+        if(appText.length < 5) return (notify({message: "Длина сообщения должна быть больше пяти символов", type: "info", duration: 4200}));
+        if(appPrice < 100) return (notify({message: "Предлагаемая цена должна быть больше 100", type: "info", duration: 4200}));
+
         const nowdate = new Date().toISOString();
         try {
-            await api.post(`/tasks/tasks/${task.id}/apply`, { comment: "test", proposed_price: 100, proposed_deadline: `${nowdate}` })
+            await api.post(`/tasks/tasks/${task.id}/apply`, { comment: appText, proposed_price: appPrice, proposed_deadline: nowdate })
             notify({ message: `Вы подали заявку на выполнение заказа #${task.id}`, type: "info", duration: 4200 });
         }
         catch (error) {
             console.log(error);
             notify({ message: `${error.response?.data?.detail || "Ошибка при подаче заявки"}`, type: "error", duration: 4200 });
         }
+        update();
+    }
+
+    const handleRecallApp = async () => {
+        try{
+            await api.post(`/tasks/tasks/applications/cancel/?application_id=${matchedApp.id}`);
+            update();
+        }
+        catch(error){
+            console.error(error);
+        }
+    }
+
+    const update = () =>{
+        setUpdate(prev => !prev);
     }
 
     const handleConfirm = () => {
@@ -202,9 +251,19 @@ export const TaskViewer = () => {
                             <>
                                 {task.status == "Открытая" && (
                                 <div className="tbbottom">
-                                    <SimpleButton icon="user" style="accent" onClick={handleSendApp}>
-                                        Откликнуться
-                                    </SimpleButton>
+                                    {!isApped ? (
+                                        <div className="bfxcol gap5">
+                                            <Inputor type="text" maxLength={50} placeholder="Сообщение к отклику" onChange={(e) => setAppText(e.target.value)}></Inputor>
+                                            <Inputor style={{minWidth: 100 + "px"}} type="number" max={999999} placeholder="Ваша цена" onChange={(e) => setAppPrice(e.target.value)}></Inputor>
+                                            <SimpleButton icon="user" style="accent" onClick={handleSendApp}>Откликнуться</SimpleButton>
+                                        </div>
+                                    ) : (
+                                        <div className="bfxcol gap20">
+                                            <div className="propblock">Заявка оставлена</div>
+                                            <SimpleButton style="black" icon="arrow-rotate-left" onClick={handleRecallApp}>Отозвать заявку</SimpleButton>
+                                        </div>
+                                        )
+                                    }
                                 </div>
                                 )}
                             </>
@@ -231,9 +290,9 @@ export const TaskViewer = () => {
                 {task.status === "Закрытая" && (
                     <>
                         {taskOwner.id === myuser.id && !task.customer_review ?(
-                            <MakeReview task={task} taskowner={taskOwner} taskfreelancer={taskFreelancer} action={handleTaskFetch}/>
+                            <MakeReview task={task} taskowner={taskOwner} taskfreelancer={taskFreelancer} action={update}/>
                         ) : taskFreelancer.id === myuser.id && !task.freelancer_review && (
-                            <MakeReview task={task} taskowner={taskOwner} taskfreelancer={taskFreelancer} action={handleTaskFetch}/>
+                            <MakeReview task={task} taskowner={taskOwner} taskfreelancer={taskFreelancer} action={update}/>
                         )}
                     </>
                 )}
