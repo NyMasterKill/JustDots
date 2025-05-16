@@ -7,18 +7,18 @@ const TaskStatus = ({status}) => {
             {status === "Закрытая" ? (
                 <span style={{ color: "white", fontSize: "14px", fontWeight: 800 }}>{status}</span>
             ) : status === "В процессе" ? (
-                <span style={{ color: "black", fontSize: "14px", fontWeight: 800 }}>{status}</span>
+                <span style={{ color: "var(--variable-collection-black", fontSize: "14px", fontWeight: 800 }}>{status}</span>
             ) : status === "На рассмотрении модерацией" ? (
                 <>
                     <div
                         style={{
                             width: "10px",
                             height: "10px",
-                            background: "blue"
+                            background: "#4848fa"
                         }}
                         className="ellipse"
                     />
-                    <span style={{ color: "blue", fontSize: "14px", fontWeight: 800 }}>
+                    <span style={{ color: "#4848fa", fontSize: "14px", fontWeight: 800 }}>
                         {status}
                     </span>
                 </>

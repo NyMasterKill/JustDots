@@ -109,7 +109,7 @@ const Order = ({task}) => {
             <div className="taskblock">
                 <div className="tbtop">
                     <div className="task-freelancerlinkfull">
-                        <span>Заказчик</span>
+                        <span style={{color: "var(--variable-collection-black)"}}>Заказчик</span>
                         <Link style={{ textDecoration: "none" }} to={`/profile/${taskOwner.id}`}>
                             <div className="miniprofile">
                                 {taskOwner.username}

@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import {useContext, useState} from 'react';
 import {Link, useNavigate} from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import SimpleButton from './SimpleButton';
@@ -6,13 +6,19 @@ import LogoContainer from './LogoContainer';
 import SimpleHatButton from './SimpleHatButton';
 import { SERVER_URL } from '../pathconfig.js';
 
-const Navbar = () => {
+const Navbar = ({themeSwitcher, isDark}) => {
     const navigate = useNavigate();
     const { myuser, isAuthenticated, logout } = useContext(AuthContext);
     const handleLogout = async () => {
         await logout();
         navigate("/login");
     };
+
+    const[darken, setDarken] = useState(false);
+    const handleSwitch = () => {
+        setDarken(prev => !prev);
+        themeSwitcher();
+    }
 
     return (
         <>
@@ -56,6 +62,7 @@ const Navbar = () => {
                                         <img src={myuser.profile?.avatar_url ? `${SERVER_URL + myuser.profile?.avatar_url}` : null} />
                                     </div>
                                 </Link>
+                                <SimpleButton icon={isDark ? "sun" : "moon"} onClick={themeSwitcher}></SimpleButton>
                                 <SimpleHatButton style="black" icon="power-off" title="Выйти из аккаунта" onClick={handleLogout}></SimpleHatButton>
                             </>
                         ) : (
@@ -68,7 +75,8 @@ const Navbar = () => {
                                         <SimpleButton icon="search" style="accent">Модерация заказов</SimpleButton>
                                     </Link>
                                 </div>
-                                {myuser.username}
+                                <span style={{color: "var(--variable-collection-black)"}}>{myuser.username}</span>
+                                <SimpleButton icon={isDark ? "sun" : "moon"} onClick={themeSwitcher}></SimpleButton>
                                 <SimpleHatButton style="black" icon="power-off" title="Выйти из аккаунта" onClick={handleLogout}></SimpleHatButton>
                             </>
                     )}

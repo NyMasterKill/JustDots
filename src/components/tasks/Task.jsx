@@ -159,7 +159,7 @@ export const Task = ({ task, trigger }) => {
                     ) : null}
                     <SimpleButton
                         icon="search"
-                        iconColor="black"
+                        iconColor="var(--variable-collection-black)"
                         onClick={() => navigate(`/task/${task.id}`)}
                     >
                         Посмотреть заказ

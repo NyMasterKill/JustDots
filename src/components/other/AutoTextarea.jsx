@@ -38,7 +38,8 @@ export const AutoTextarea = ({fSize, children }) => {
                 overflow: 'hidden',
                 minHeight: '5px',
                 fontSize: `${textSize}`,
-                background: '#00000000'
+                background: '#00000000',
+                color: `var(--variable-collection-black)`
             }}
             disabled
         />

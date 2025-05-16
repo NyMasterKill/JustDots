@@ -5,9 +5,26 @@
     --variable-collection-white: rgb(255, 255, 255);
     --variable-collection-border: rgba(0, 0, 0, 0.15);
     --variable-collection-shadow: rgba(0, 0, 0, 0.15);
+    --hat: rgba(255, 255, 255, 0.15);
     --mainbackground: #ffffff;
-    --hat: rgba(255, 255, 255, 0.54);
+    --mainbackgroundh: #ffffff00;
+    --loadercontain: rgb(163, 163, 163);
+    --loadercontain0: rgb(163, 163, 163, 0);
 }
+
+
+/*--variable-collection-accent: rgb(48, 120, 120);*/
+/*--variable-collection-black: rgb(255, 255, 255);*/
+/*--variable-collection-blackprop: rgb(0, 0, 0);*/
+/*--variable-collection-white: rgb(41, 41, 41);*/
+/*--variable-collection-border: rgba(149, 149, 149, 0.15);*/
+/*--variable-collection-shadow: rgba(0, 0, 0, 0.15);*/
+/*--mainbackground: #191919;*/
+/*--mainbackgroundh: #19191900;*/
+/*--hat: rgba(0, 0, 0, 0.14);*/
+/*--loadercontain1: rgb(62, 61, 61);*/
+/*--loadercontain0: rgba(34, 34, 34, 0);*/
+
 
 #root {
     display: flex;
@@ -22,6 +39,7 @@
 
 body {
     margin: 0px;
+    background: var(--mainbackground);
 }
 
 .hat {
@@ -112,7 +130,7 @@ body {
     padding: 0px 15px;
     font-weight: 500;
     box-shadow: 0px 2px 8px var(--variable-collection-shadow);
-    transition: background 150ms ease-in-out;
+    transition: filter 150ms ease-in-out;
     text-decoration: none;
 }
 
@@ -188,7 +206,7 @@ body {
     border-radius: 12px;
     font-size: 16px;
     font-family: Ubuntu;
-    color: var(--variable-collection-white);
+    color: white;
     padding: 0px 15px;
     font-weight: 500;
     box-shadow: 0px 2px 8px var(--variable-collection-shadow);
@@ -207,13 +225,13 @@ body {
 }
 
 .simple-button-white:hover {
-    background: rgb(240, 240, 240);
+    filter: brightness(90%);
     cursor: pointer;
 }
 
 .simple-button-white:active {
-    transition: background 0ms;
-    background: rgb(211, 211, 211);
+    transition: filter 0ms;
+    filter: brightness(70%);
 }
 
 .simple-button-black:hover {
@@ -279,13 +297,14 @@ body {
 }
 
 .formblock {
-    background: white;
-    gap: 15px;
+    background: var(--variable-collection-white);
+    gap: 5px;
     border: 1px solid var(--variable-collection-border);
     border-radius: 24px;
     box-shadow: 0px 4px 8px var(--variable-collection-shadow);
     display: flex;
     flex-direction: column;
+    color: var(--variable-collection-black);
     justify-content: center;
     align-items: center;
     padding: 15px;
@@ -294,10 +313,11 @@ body {
 .formblock form {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 10px;
 }
 
 .formblock-title {
+    color: var(--variable-collection-black);
     padding-bottom: 10px;
     font-size: 20px;
     font-weight: 800;
@@ -330,11 +350,11 @@ body {
 }
 
 .Inputor:hover {
-    background-color: rgb(245, 245, 245);
+    filter: brightness(90%);
 }
 
 .Inputor:focus {
-    background-color: white;
+    background-color: var(--variable-collection-white);
     outline-offset: -2px;
     outline: 2px solid var(--variable-collection-accent);
 }
@@ -343,7 +363,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    background: white;
+    background: var(--variable-collection-white);
     min-height: 38px;
     box-shadow: 0px 4px 8px var(--variable-collection-shadow);
     border-radius: 12px;
@@ -352,7 +372,7 @@ body {
 }
 
 .role-option {
-    background: rgb(255, 255, 255);
+    background: var(--variable-collection-white);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -376,7 +396,7 @@ body {
 
 
 .role-option:hover {
-    background: rgb(232, 232, 232);
+    filter: brightness(80%);
 }
 
 .main-container {
@@ -390,6 +410,7 @@ body {
 }
 
 .loader-container {
+    position: fixed;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -406,7 +427,7 @@ body {
 .ellipse {
     width: 25px;
     height: 25px;
-    background: rgba(0, 0, 0, 0.171);
+    background: var(--variable-collection-black);
     border-radius: 9999px;
     position: relative;
     z-index: 10;
@@ -429,9 +450,9 @@ body {
 }
 
 .ell-loader:nth-child(4) {
-    outline: 5px solid rgba(0, 0, 0, 0.171);
+    outline: 5px solid var(--variable-collection-black);
     outline-offset: -5px;
-    background: white;
+    background: var(--mainbackground);
     animation: loader 2s ease-in-out infinite 300ms;
 }
 
@@ -469,7 +490,7 @@ body {
     position: absolute;
     width: 200px;
     height: 150px;
-    background: linear-gradient(360deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 1) 25%, rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 0) 100%);
+    background: linear-gradient(360deg, var(--mainbackground) 0%, var(--mainbackground) 25%, var(--mainbackgroundh) 30%, var(--mainbackgroundh) 100%);
     z-index: 11;
 }
 
@@ -620,7 +641,7 @@ body {
 
 .black {
     background: var(--variable-collection-blackprop);
-    color: var(--variable-collection-white);
+    color: white;
 }
 
 .accent {
@@ -836,20 +857,20 @@ form {
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 32px;
-    height: 32px;
+    width: 24px;
+    height: 24px;
     border-radius: 12px;
     font-size: 16px;
     background: var(--variable-collection-white);
     color: var(--variable-collection-black);
     border: 1px solid var(--variable-collection-border);
     box-shadow: 0px 2px 8px var(--variable-collection-shadow);
-    transition: background 150ms ease-in-out;
+    transition: filter 150ms ease-in-out;
 }
 
 .skillremover:hover{
     cursor: pointer;
-    background: #e8e8e8;
+    filter: brightness(90%);
 }
 
 .bfxrow{
@@ -1040,7 +1061,7 @@ form {
     align-items: center;
     gap: 5px;
     background: var(--variable-collection-blackprop);
-    color: var(--variable-collection-white);
+    color: white;
     padding: 10px;
     border-radius: 24px;
     font-size: 18px;
@@ -1056,7 +1077,7 @@ form {
     display: flex;
     align-items: center;
     gap: 5px;
-    background: white;
+    background: var(--variable-collection-white);
     color: var(--variable-collection-black);
     padding: 10px;
     border-radius: 24px;
@@ -1111,9 +1132,9 @@ form {
     right: 0;
     bottom: 0;
     background: linear-gradient(90deg,
-            rgba(255, 255, 255, 0) 0%,
-            rgba(219, 219, 219, 0.8) 50%,
-            rgb(255, 255, 255) 100%);
+            var(--loadercontain0) 0%,
+            var(--loadercontain1) 50%,
+            var(--loadercontain0) 100%);
     animation: blockloading 1s ease-in-out infinite;
 }
 
@@ -1258,7 +1279,7 @@ form {
 
 .message-text{
     background: var(--variable-collection-accent);
-    color: var(--variable-collection-white);
+    color: white;
     padding: 10px;
     word-break: auto-phrase;
     max-width: 350px;

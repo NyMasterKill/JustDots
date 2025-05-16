@@ -171,7 +171,7 @@ export const TaskViewer = () => {
             <div className='hatsaver'></div>
             <div className='blocktitle'>
                 <SimpleButton icon="arrow-left" onClick={() => navigate(-1)}>Назад</SimpleButton>
-                заказ #{task.id}
+                    заказ #{task.id}
                 <SimpleButton icon="code" onClick={debugTaskID}>DBG: taskID</SimpleButton>
             </div>
             <div className="bodyblock gap10">
@@ -212,7 +212,7 @@ export const TaskViewer = () => {
                                     </SimpleButton>
                                 ) : (
                                     <div className="task-freelancerlinkfull">
-                                        <span>{task.status === "В процессе" ? "В работе у" : "Заказ выполнил"}</span>
+                                        <span style={{color: "var(--variable-collection-black)"}}>{task.status === "В процессе" ? "В работе у" : "Заказ выполнил"}</span>
                                         <Link style={{ textDecoration: "none" }} to={`/profile/${taskFreelancer.id}`}>
                                             <div className="miniprofile">
                                                 {taskFreelancer.username}
@@ -229,7 +229,7 @@ export const TaskViewer = () => {
                         ) : task.status !== "На рассмотрении модерацией" ? (
                             <div className="tbtop">
                                 <div className="task-freelancerlinkfull">
-                                    <span>Заказчик</span>
+                                    <span style={{color: "var(--variable-collection-black)"}}>Заказчик</span>
                                     <Link style={{ textDecoration: "none" }} to={`/profile/${taskOwner.id}`}>
                                         <div className="miniprofile">
                                             {taskOwner.username}
