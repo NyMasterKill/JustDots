@@ -55,7 +55,7 @@ async def create_review(
 
     reviews = db.query(Review).filter(Review.reviewer_id == reviewer_id).all()
     total_score = sum(review.score for review in reviews)
-    average_rating = total_score / len(reviews) if reviews else 0.0
+    average_rating = round(total_score / len(reviews), 1) if reviews else 0.0
 
     reviewer = db.query(User).get(reviewer_id)
     if not reviewer:

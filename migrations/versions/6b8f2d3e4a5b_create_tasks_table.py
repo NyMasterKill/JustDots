@@ -20,6 +20,8 @@ def upgrade() -> None:
         sa.Column('skill_level', sa.Enum('Менее года', 'От 1 до 3 лет', 'Более 3 лет', name='taskskilllevel'), nullable=False),
         sa.Column('status', sa.Enum("На рассмотрении модерацией", "Отклонена модерацией", 'Открытая', 'В процессе', 'Закрытая', name='taskstatus'), nullable=False, server_default=TaskStatus.PENDING_MODERATION.value),
         sa.Column('owner_id', sa.Integer(), nullable=False),
+        sa.Column('submitted_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+        sa.Column('created_at', sa.DateTime(timezone=True), nullable=True),
         sa.ForeignKeyConstraint(['owner_id'], ['users.id']),
         sa.PrimaryKeyConstraint('id')
     )

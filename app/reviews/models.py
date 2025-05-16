@@ -15,4 +15,4 @@ class Review(Base):
 
     user = relationship("User", backref="reviews", foreign_keys=[user_id])
     reviewer = relationship("User", backref="reviews_written", foreign_keys=[reviewer_id])
-    task = relationship("Task", backref="reviews")
+    task = relationship("Task", back_populates="reviews")

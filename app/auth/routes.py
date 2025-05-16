@@ -4,7 +4,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from psycopg.errors import UniqueViolation
 from .models import User, UserType, BlacklistedToken
-from .schemas import UserCreate, UserResponse, UserLogin, Token, ChangeUserRoleRequest1, ChangeUserRoleRequest2, BanUserRequest
+from .schemas import UserCreate, UserResponse, UserLogin, Token, ChangeUserRoleRequest1, ChangeUserRoleRequest2, \
+    BanUserRequest
 from .dependencies import hash_password, verify_password, create_access_token, create_refresh_token, \
     verify_refresh_token, get_current_user, oauth2_scheme
 from ..database import get_db
@@ -12,6 +13,7 @@ from datetime import datetime
 from ..tasks.models import Task, TaskStatus
 
 router = APIRouter()
+
 
 @router.post("/register", response_model=UserResponse)
 async def register_user(user: UserCreate, db: Session = Depends(get_db)):
@@ -74,9 +76,9 @@ async def register_user(user: UserCreate, db: Session = Depends(get_db)):
 
 @router.post("/login", response_model=Token)
 async def login_user(
-    user: UserLogin,
-    response: Response,
-    db: Session = Depends(get_db)
+        user: UserLogin,
+        response: Response,
+        db: Session = Depends(get_db)
 ):
     query = db.query(User)
     if user.email:
@@ -112,8 +114,10 @@ async def login_user(
 
     return {"access_token": access_token, "token_type": "bearer"}
 
+
 @router.post("/token", response_model=Token, include_in_schema=False)
-async def login_for_access_token(response: Response, form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+async def login_for_access_token(response: Response, form_data: OAuth2PasswordRequestForm = Depends(),
+                                 db: Session = Depends(get_db)):
     query = db.query(User)
     input_value = form_data.username
     if "@" in input_value:
@@ -144,32 +148,35 @@ async def login_for_access_token(response: Response, form_data: OAuth2PasswordRe
         samesite="strict",
         max_age=7 * 24 * 60 * 60
     )
-    
+
     return {"access_token": access_token, "token_type": "bearer"}
 
+
 @router.post("/refresh", response_model=Token)
-async def refresh_access_token(response: Response, refresh_token: str | None = Cookie(default=None), db: Session = Depends(get_db)):
+async def refresh_access_token(response: Response, refresh_token: str | None = Cookie(default=None),
+                               db: Session = Depends(get_db)):
     if not refresh_token:
         raise HTTPException(status_code=401, detail="Refresh token не предоставлен")
-    
+
     email = verify_refresh_token(refresh_token)
     user = db.query(User).filter(User.email == email).first()
     if not user:
         raise HTTPException(status_code=401, detail="Пользователь не найден")
-    
+
     new_access_token = create_access_token(data={"sub": user.email})
     new_refresh_token = create_refresh_token(data={"sub": user.email})
-    
+
     response.set_cookie(
         key="refresh_token",
         value=new_refresh_token,
         httponly=True,
-        secure=False,  
+        secure=False,
         samesite="strict",
-        max_age=7 * 24 * 60 * 60  
+        max_age=7 * 24 * 60 * 60
     )
-    
+
     return {"access_token": new_access_token, "token_type": "bearer"}
+
 
 @router.post("/logout")
 async def logout_user(response: Response, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
@@ -178,8 +185,9 @@ async def logout_user(response: Response, db: Session = Depends(get_db), token: 
     db.commit()
 
     response.delete_cookie(key="refresh_token")
-    
+
     return {"message": "Выход выполнен успешно, токен отозван"}
+
 
 @router.get("/me", response_model=UserResponse)
 async def get_current_user_info(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
@@ -212,16 +220,16 @@ async def get_current_user_info(current_user: User = Depends(get_current_user), 
         profile=profile_data,
         skills=current_user.skills,
         completed_tasks_count=completed_tasks_count,
-        rating = current_user.rating
+        rating=current_user.rating
     )
+
 
 @router.post("/moderate/change-role", response_model=UserResponse)
 async def moderate_change_role(
-    request_data: ChangeUserRoleRequest1,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+        request_data: ChangeUserRoleRequest1,
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_user)
 ):
-
     if current_user.user_type != UserType.MODERATOR:
         raise HTTPException(status_code=403, detail="Только модераторы могут использовать этот эндпоинт")
 
@@ -263,13 +271,13 @@ async def moderate_change_role(
         "completed_tasks_count": getattr(target_user, "completed_tasks_count", 0)
     })
 
+
 @router.post("/admin/change-role", response_model=UserResponse)
 async def admin_change_role(
-    request_data: ChangeUserRoleRequest2,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+        request_data: ChangeUserRoleRequest2,
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_user)
 ):
-
     if current_user.user_type != UserType.MODERATOR or current_user.id != 1:
         raise HTTPException(status_code=403, detail="Доступ запрещён")
 
@@ -298,13 +306,13 @@ async def admin_change_role(
         "completed_tasks_count": getattr(target_user, "completed_tasks_count", 0)
     })
 
+
 @router.post("/ban", status_code=status.HTTP_200_OK)
 async def ban_user(
-    request_data: BanUserRequest,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+        request_data: BanUserRequest,
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_user)
 ):
-
     if current_user.user_type != UserType.MODERATOR:
         raise HTTPException(status_code=403, detail="Только модератор может банить пользователей")
 

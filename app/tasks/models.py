@@ -1,7 +1,9 @@
 from sqlalchemy import Column, Integer, String, Text, Float, DateTime, Enum as SQLAlchemyEnum
 from sqlalchemy import ForeignKey
+from sqlalchemy import func
 from ..database import Base
 import enum
+from sqlalchemy.orm import relationship
 
 class TaskStatus(enum.Enum):
     PENDING_MODERATION = "На рассмотрении модерацией"
@@ -49,6 +51,9 @@ class Task(Base):
     )
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     freelancer_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    submitted_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_at = Column(DateTime(timezone=True), nullable=True)
+    reviews = relationship("Review", back_populates="task")
 
 class ApplicationStatus(enum.Enum):
     PENDING = "На рассмотрении"

@@ -11,11 +11,11 @@ from typing import List, Dict
 
 router = APIRouter()
 
-# Хранилище активных подключений (user_id -> WebSocket)
 active_connections: Dict[int, WebSocket] = {}
 
 @router.websocket("/ws/{user_id}")
-async def websocket_endpoint(websocket: WebSocket, user_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user_ws)):
+async def websocket_endpoint(websocket: WebSocket, user_id: int, db: Session = Depends(get_db),
+                             current_user: User = Depends(get_current_user_ws)):
     await websocket.accept()
     active_connections[user_id] = websocket
 
@@ -30,12 +30,10 @@ async def websocket_endpoint(websocket: WebSocket, user_id: int, db: Session = D
                 await websocket.send_json({"error": "Message and to_user_id are required"})
                 continue
 
-            # Проверка, что текущий пользователь — отправитель
             if current_user.id != user_id:
                 await websocket.send_json({"error": "Unauthorized"})
                 continue
 
-            # Создание и сохранение сообщения в БД
             new_message = ChatMessage(
                 sender_id=current_user.id,
                 receiver_id=to_user_id,
@@ -45,7 +43,6 @@ async def websocket_endpoint(websocket: WebSocket, user_id: int, db: Session = D
             db.add(new_message)
             db.commit()
 
-            # Отправка сообщения получателю, если он онлайн
             if to_user_id in active_connections:
                 await active_connections[to_user_id].send_json({
                     "sender_id": current_user.id,
@@ -59,13 +56,13 @@ async def websocket_endpoint(websocket: WebSocket, user_id: int, db: Session = D
     except Exception as e:
         await websocket.send_json({"error": str(e)})
         active_connections.pop(user_id, None)
-        
-        
+
+
 @router.get("/messages", response_model=List[ChatMessageResponse])
 async def get_chat_history(
-    with_user_id: int,  
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+        with_user_id: int,
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_user)
 ):
     messages = db.query(ChatMessage).filter(
         or_(
@@ -73,6 +70,5 @@ async def get_chat_history(
             (ChatMessage.sender_id == with_user_id) & (ChatMessage.receiver_id == current_user.id)
         )
     ).order_by(ChatMessage.created_at.asc()).all()
-
 
     return messages

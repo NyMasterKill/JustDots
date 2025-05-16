@@ -6,7 +6,10 @@ from app.database import get_db
 from .models import Task, TaskCategory, TaskSkillLevel, TaskStatus, Application, ApplicationStatus
 from .schemas import TaskCreate, TaskUpdate, TaskResponse, ApplicationCreate, ApplicationResponse
 from app.auth.models import User, UserType
+from app.users.models import Profile
 from typing import List, Optional
+from datetime import datetime, timezone
+from sqlalchemy.orm import joinedload
 
 router = APIRouter(prefix="/tasks", tags=["Tasks"])
 
@@ -73,26 +76,21 @@ async def get_tasks(
     limit: int = 10
 ):
     query = db.query(Task)
-
     if filter == "my":
         if current_user.user_type != UserType.CUSTOMER:
             raise HTTPException(status_code=403, detail="Доступ запрещён, вы не являетесь заказчиком")
         query = query.filter(Task.owner_id == current_user.id)
-
     elif filter == "public":
         if current_user.user_type != UserType.FREELANCER:
             raise HTTPException(status_code=403, detail="Доступ запрещён, вы не являетесь фрилансером")
         query = query.filter(Task.status == TaskStatus.OPEN)
-
     elif filter == "assigned":
         if current_user.user_type != UserType.FREELANCER:
             raise HTTPException(status_code=403, detail="Доступ запрещён, вы не являетесь фрилансером")
         query = query.filter(Task.freelancer_id == current_user.id)
-
     else:
         if current_user.user_type != UserType.MODERATOR:
             raise HTTPException(status_code=403, detail="Доступ запрещён, вы не являетесь модератором")
-
     if status:
         query = query.filter(Task.status == status)
     if category:
@@ -101,7 +99,16 @@ async def get_tasks(
         query = query.filter(Task.skill_level == skill_level)
 
     tasks = query.offset(skip).limit(limit).all()
-    return [TaskResponse.model_validate(task.__dict__) for task in tasks]
+
+    result = []
+    for task in tasks:
+        owner_profile = db.query(Profile).filter(Profile.user_id == task.owner_id).first()
+        result.append(TaskResponse(
+            **task.__dict__,
+            owner_profile=owner_profile
+        ))
+
+    return result
 
 @router.get("/applications", response_model=List[ApplicationResponse])
 async def get_task_applications(
@@ -144,18 +151,34 @@ async def get_task_by_id(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    task = db.query(Task).filter(Task.id == task_id).first()
+    task = db.query(Task).options(joinedload(Task.reviews)).filter(Task.id == task_id).first()
     if not task:
         raise HTTPException(status_code=404, detail="Задача не найдена")
 
+    owner_profile = db.query(Profile).filter(Profile.user_id == task.owner_id).first()
+
     if current_user.user_type == UserType.CUSTOMER and task.owner_id == current_user.id:
-        return TaskResponse.model_validate(task.__dict__)
-    elif current_user.user_type == UserType.FREELANCER and (task.status == TaskStatus.OPEN or (task.status == TaskStatus.IN_PROGRESS and task.freelancer_id == current_user.id)):
-        return TaskResponse.model_validate(task.__dict__)
+        customer_review = next((r for r in task.reviews if r.user_id == task.owner_id), None)
+        freelancer_review = next((r for r in task.reviews if r.user_id == task.freelancer_id), None)
+    elif current_user.user_type == UserType.FREELANCER and (
+        task.status == TaskStatus.OPEN or
+        (task.status == TaskStatus.IN_PROGRESS and task.freelancer_id == current_user.id) or
+        (task.status == TaskStatus.CLOSED and task.freelancer_id == current_user.id)
+    ):
+        customer_review = next((r for r in task.reviews if r.user_id == task.owner_id), None)
+        freelancer_review = next((r for r in task.reviews if r.user_id == task.freelancer_id), None)
     elif current_user.user_type == UserType.MODERATOR:
-        return TaskResponse.model_validate(task.__dict__)
+        customer_review = next((r for r in task.reviews if r.user_id == task.owner_id), None)
+        freelancer_review = next((r for r in task.reviews if r.user_id == task.freelancer_id), None)
     else:
         raise HTTPException(status_code=403, detail="Доступ запрещён")
+
+    return TaskResponse(
+        **task.__dict__,
+        owner_profile=owner_profile,
+        customer_review=customer_review,
+        freelancer_review=freelancer_review
+    )
 
 @router.put("/{task_id}/update", response_model=TaskResponse)
 async def update_task(
@@ -252,17 +275,16 @@ async def approve_task(
 ):
     if current_user.user_type != UserType.MODERATOR:
         raise HTTPException(status_code=403, detail="Только модератор может одобрять задачи")
-
     task = db.query(Task).filter(Task.id == task_id).first()
     if not task:
         raise HTTPException(status_code=404, detail="Задача не найдена")
     if task.status != TaskStatus.PENDING_MODERATION:
         raise HTTPException(status_code=400, detail="Можно одобрить только задачу на рассмотрении")
 
+    task.created_at = datetime.now(timezone.utc)
     task.status = TaskStatus.OPEN
     db.commit()
     db.refresh(task)
-
     return TaskResponse.model_validate(task.__dict__)
 
 @router.post("/{task_id}/moderate/reject", response_model=TaskResponse)
@@ -330,10 +352,10 @@ async def apply_for_task(
 
 @router.post("/{task_id}/applications/{application_id}/accept", response_model=TaskResponse)
 async def accept_application(
-        task_id: int,
-        application_id: int,
-        db: Session = Depends(get_db),
-        current_user: User = Depends(get_current_user)
+    task_id: int,
+    application_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     if current_user.user_type != UserType.CUSTOMER:
         raise HTTPException(status_code=403, detail="Только заказчики могут принимать заявки")
@@ -354,10 +376,16 @@ async def accept_application(
     if application.status != ApplicationStatus.PENDING:
         raise HTTPException(status_code=400, detail="Заявка уже обработана")
 
+    application.status = ApplicationStatus.ACCEPTED
+
     task.status = TaskStatus.IN_PROGRESS
     task.freelancer_id = application.freelancer_id
 
-    application.status = ApplicationStatus.ACCEPTED
+    if application.proposed_price is not None:
+        task.budget_min = application.proposed_price
+        task.budget_max = application.proposed_price
+    else:
+        pass
 
     other_applications = db.query(Application).filter(
         and_(Application.task_id == task_id, Application.id != application_id)

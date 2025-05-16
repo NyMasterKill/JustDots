@@ -11,8 +11,7 @@ class SkillBase(BaseModel):
 
 class Skill(SkillBase):
     id: int
-    user_id: int
-
+  
     class Config:
         from_attributes = True
 
@@ -36,7 +35,6 @@ class PortfolioBase(BaseModel):
 
 class Portfolio(PortfolioBase):
     id: int
-    user_id: int
 
     class Config:
         from_attributes = True

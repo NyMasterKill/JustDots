@@ -2,6 +2,8 @@ from pydantic import BaseModel
 from typing import Optional
 from enum import Enum
 from datetime import datetime
+from ..reviews.schemas import ReviewResponse
+from ..users.schemas import Profile
 
 class TaskStatus(str, Enum):
     PENDING_MODERATION = "На рассмотрении модерацией"
@@ -63,6 +65,13 @@ class TaskResponse(BaseModel):
     status: TaskStatus
     owner_id: Optional[int] = None
     freelancer_id: Optional[int] = None
+    submitted_at: datetime
+    created_at: Optional[datetime]
+
+    customer_review: Optional[ReviewResponse] = None
+    freelancer_review: Optional[ReviewResponse] = None
+
+    owner_profile: Optional[Profile] = None
 
     model_config = {"use_enum_values": True, "from_attributes": True}
 
