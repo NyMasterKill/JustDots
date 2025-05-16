@@ -5,11 +5,12 @@ import {ReviewStars} from "./ReviewStars.jsx";
 import api from "../../services/api.jsx";
 import {useNotification} from "../../context/Notifications.jsx";
 
-const MakeReview = ({task, taskowner, taskfreelancer}) => {
+const MakeReview = ({task, taskowner, taskfreelancer, action}) => {
     const {myuser} = useContext(AuthContext);
     const [rating, setRating] = useState(5);
     const [text, setText] = useState('');
     const notify = useNotification();
+
 
     const handleInput = (value) => {
         setRating(value);
@@ -26,6 +27,7 @@ const MakeReview = ({task, taskowner, taskfreelancer}) => {
             console.log(error);
             notify({message: `Произошла ошибка при отправке отзыва по заказу #${task.id}: ${error?.message}`, type: "success", duration:4200});
         }
+        action();
     }
 
     if(!myuser) return;

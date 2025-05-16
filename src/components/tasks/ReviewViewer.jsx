@@ -1,8 +1,9 @@
 import React from 'react';
 import ReviewItem from "../other/ReviewItem.jsx";
 
-const ReviewViewer = ({taskOwner, taskFreelancer, task, myuser}) => {
+const ReviewViewer = ({taskOwner, taskFreelancer, task, myuser, updater}) => {
     if(!taskOwner || !taskFreelancer || !task || !myuser) return;
+
     return (
         <>
         {taskOwner.id === myuser.id && (task.customer_review || task.freelancer_review) ? (

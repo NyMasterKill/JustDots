@@ -10,10 +10,13 @@ import { SERVER_URL } from '../pathconfig.js';
 import Icon from "./other/Icon.jsx";
 import ProfileEditor from "./ProfileEditor.jsx";
 import AutoTextarea from "./other/AutoTextarea.jsx";
+import PortfolioItem from "./other/PortfolioItem.jsx";
+import ReviewItem from "./other/ReviewItem.jsx";
 
 const Profile = () => {
     const { id } = useParams();
     const [profile, setProfile] = useState(null);
+    const [profileReviews, setProfileReviews] = useState([]);
     const [loading, setLoading] = useState(true);
     const [changemode, setChangeMode] = useState(false);
     const { myuser } = useContext(AuthContext);
@@ -38,8 +41,24 @@ const Profile = () => {
                 setLoading(false);
             }
         };
+
         Fetcher();
     }, [id, isUpdated, changemode])
+
+    useEffect(() => {
+        const ReviewsFetcher = async () => {
+            if(!profile) return;
+            try{
+                const response = await api.get(`/reviews/reviews/user/${profile.id}`);
+                setProfileReviews(response.data);
+            }
+            catch(error){
+                console.error(error);
+            }
+        }
+        ReviewsFetcher();
+    }, [profile]);
+
 
     const refreshProfile = () => {
         setUpdate(true);
@@ -51,6 +70,10 @@ const Profile = () => {
     }
     const reChangeMode = () => {
         setChangeMode(false);
+    }
+
+    const debugProfileID = () =>{
+        console.debug(profile);
     }
 
     if (loading) {
@@ -66,6 +89,7 @@ const Profile = () => {
             <div className='hatsaver'></div>
             <div className='blocktitle'>
                 {profile && profile.id === myuser.id ? "мой профиль" : "профиль пользователя "}
+                <SimpleButton icon="code" onClick={debugProfileID}>DBG: ProfileID</SimpleButton>
             </div>
             <div className='bodyblock'>
                 <div className='filler'>
@@ -97,16 +121,16 @@ const Profile = () => {
                             }
                             <div className={"propblock black"}>
                                 <Icon icon="star" color="gold"></Icon>
-                                {profile.profile.rating || "0"}
+                                {profile?.profile?.rating || "0"}
                             </div>
                             <div className='propblock accent'>
-                                {profile.completed_tasks_count} {profile.user_type == "freelancer" ? "выполненных" : "завершённых"} заказов
+                                {profile?.completed_tasks_count} {profile?.user_type == "freelancer" ? "выполненных" : "завершённых"} заказов
                             </div>
                         </div>
                         <div className='profile-info-sub'>
                             <div className='simplepropblock'>
                                 <Icon icon="circle-user"/>
-                                {profile.last_name} {profile.first_name} {profile.patronymic}
+                                {profile?.last_name} {profile?.first_name} {profile?.patronymic}
                             </div>
                             <div className='simplepropblock'>
                                 <Icon icon="calendar"/>
@@ -115,10 +139,8 @@ const Profile = () => {
                         </div>
                     </div>
                     <div className='profile-edit-container'>
-                        {myuser.id == profile.id ? (
+                        {myuser?.id == profile?.id && (
                             <SimpleButton icon='edit' onClick={changeMode}>Редактировать профиль</SimpleButton>
-                        ) : (
-                            null
                         )}
                     </div>
                 </div>
@@ -126,28 +148,39 @@ const Profile = () => {
                     Обо мне
                 </div>
                 <div className='textblock'>
-                    <AutoTextarea>{profile.profile.bio}</AutoTextarea>
+                    <AutoTextarea>{profile?.profile?.bio}</AutoTextarea>
                 </div>
             </div>
             <div className='bodyblock gap5'>
                 <div className='titleblock'>
                     Навыки
                 </div>
-                <div className='skillsflex'>
-                    {profile.skills.map((skill, index) => (
-                        <div key={index} className="propblock black">{skill.name}</div>
-                    ))}
+                <div className="textblock">
+                    <div className='skillsflex'>
+                        {profile?.skills.map((skill, index) => (
+                            <div key={index} className="propblock black">{skill.name}</div>
+                        ))}
+                    </div>
                 </div>
                 <div style={{ paddingTop: 25 + "px" }} className='titleblock'>
                     Портфолио
                 </div>
-                <div className='textblock'>
-                    Тут пусто
+                <div className='textblock bfxcol gap10'>
+                    {profile.profile?.portfolio.map((item, index) => (
+                        <PortfolioItem key={index} item={item} viewFromProfile={true}></PortfolioItem>
+                    ))}
                 </div>
             </div>
 
-            <div className='bodyblock black'>
-
+            <div className='bodyblock gap10'>
+                <div style={{color: "var(--variable-collection-black"}} className="titleblock">
+                    Отзывы ({profileReviews.length})
+                </div>
+                <div className="textblock bfxcol gap10">
+                    {profileReviews?.map((review, index) => (
+                        <ReviewItem key={index} item={review}></ReviewItem>
+                    ))}
+                </div>
             </div>
         </>
     );

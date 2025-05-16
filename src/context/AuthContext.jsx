@@ -45,8 +45,8 @@ export const AuthProvider = ({ children }) => {
                 patronymic,
                 email,
                 bio: "Тут пусто",
-                skills: [],
-                portfolio: []
+                skills: [{name: "Пустой навык"}],
+                portfolio: [{title: "Пустой элемент портфолио", description: "Пустое описание", url: "test.ru"}]
             };
 
             await api.put('/users/profile/update', profileData);

@@ -118,7 +118,6 @@ export const TaskViewer = () => {
             <div className='blocktitle'>
                 <SimpleButton icon="arrow-left" onClick={() => navigate(-1)}>Назад</SimpleButton>
                 заказ #{task.id}
-                <SimpleButton style="black" onClick={() => console.log(task)}>DEBUG: Получить тело задачи (console)</SimpleButton>
             </div>
             <div className="bodyblock gap10">
                 <div className="bodyblock fxrow">
@@ -232,9 +231,9 @@ export const TaskViewer = () => {
                 {task.status === "Закрытая" && (
                     <>
                         {taskOwner.id === myuser.id && !task.customer_review ?(
-                            <MakeReview task={task} taskowner={taskOwner} taskfreelancer={taskFreelancer}/>
+                            <MakeReview task={task} taskowner={taskOwner} taskfreelancer={taskFreelancer} action={handleTaskFetch}/>
                         ) : taskFreelancer.id === myuser.id && !task.freelancer_review && (
-                            <MakeReview task={task} taskowner={taskOwner} taskfreelancer={taskFreelancer}/>
+                            <MakeReview task={task} taskowner={taskOwner} taskfreelancer={taskFreelancer} action={handleTaskFetch}/>
                         )}
                     </>
                 )}
