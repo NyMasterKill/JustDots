@@ -165,38 +165,40 @@ const ProfileEditor = ({profile, action, onsub}) => {
                                 <InputorWLabel typea="textarea" label="Обо мне" value={bio}  onChange={(e) => setBio(e.target.value)}></InputorWLabel>
                             </div>
                         </div>
-                        <div className="edit-container gap20">
-                            <div>
-                            <div className="titleblock">Навыки</div><br/>
-                            <div className="bfxrow">
-                                <div className="skillsflex">
-                                {skills.map((skill, index) => (
-                                    <div className="bfxrow gap5" key={index}>
-                                        <div className="propblock black">{skill.name}
-                                            <button className="skillremover" onClick={() => skillRemover(skill.name)}>
-                                                <Icon icon="xmark"/>
+                        {profile.user_type == "freelancer" && (
+                            <div className="edit-container gap20">
+                                <div>
+                                    <div className="titleblock">Навыки</div><br/>
+                                    <div className="bfxrow">
+                                        <div className="skillsflex">
+                                            {skills.map((skill, index) => (
+                                                <div className="bfxrow gap5" key={index}>
+                                                    <div className="propblock black">{skill.name}
+                                                        <button className="skillremover" onClick={() => skillRemover(skill.name)}>
+                                                            <Icon icon="xmark"/>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                            <Inputor size={1} placeholder={"Навык"} maxLength="20"
+                                                     value={skillValue}
+                                                     onChange={(e) => setSkillValue(e.target.value)}
+                                            />
+                                            <button className="skillremover" onClick={addSkill}>
+                                                <Icon icon="plus"/>
                                             </button>
                                         </div>
                                     </div>
-                                ))}
-                                    <Inputor size={1} placeholder={"Навык"} maxLength="20"
-                                             value={skillValue}
-                                         onChange={(e) => setSkillValue(e.target.value)}
-                                    />
-                                    <button className="skillremover" onClick={addSkill}>
-                                        <Icon icon="plus"/>
-                                    </button>
+                                </div>
+                                <div className="titleblock">Портфолио</div>
+                                <div className="bfxcol gap5">
+                                    {portfolio.map((item, index) => (
+                                        <PortfolioItem key={index} item={item} editor="false" action={removePortfolioItem} edit={editPortfolioItem}/>
+                                    ))}
+                                    <SimpleButton style="black" icon="plus" onClick={newPortfolioItem}></SimpleButton>
                                 </div>
                             </div>
-                            </div>
-                            <div className="titleblock">Портфолио</div>
-                            <div className="bfxcol gap5">
-                                {portfolio.map((item, index) => (
-                                    <PortfolioItem key={index} item={item} editor="false" action={removePortfolioItem} edit={editPortfolioItem}/>
-                                ))}
-                                <SimpleButton style="black" icon="plus" onClick={newPortfolioItem}></SimpleButton>
-                            </div>
-                        </div>
+                        )}
                     </div>
             </div>
         </>

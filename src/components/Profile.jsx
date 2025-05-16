@@ -12,6 +12,7 @@ import ProfileEditor from "./ProfileEditor.jsx";
 import AutoTextarea from "./other/AutoTextarea.jsx";
 import PortfolioItem from "./other/PortfolioItem.jsx";
 import ReviewItem from "./other/ReviewItem.jsx";
+import SkillsAndPortfolio from "./freelancer/SkillsAndPortfolio.jsx";
 
 const Profile = () => {
     const { id } = useParams();
@@ -23,6 +24,7 @@ const Profile = () => {
     const notify = useNotification();
     const navigate = useNavigate();
     const [isUpdated, setUpdate] = useState(false);
+
 
     useEffect(() => {
         const Fetcher = async () => {
@@ -59,6 +61,14 @@ const Profile = () => {
         ReviewsFetcher();
     }, [profile]);
 
+
+    const [sortMethod, setSortMethod] = useState(true);
+    const switchSortMethod = () => {
+        setSortMethod(prev => !prev);
+    }
+    const sortedReviews = [...(profileReviews || [])].sort((a,b) => {
+        return sortMethod ? b.score - a.score : a.score - b.score;
+    })
 
     const refreshProfile = () => {
         setUpdate(true);
@@ -151,33 +161,20 @@ const Profile = () => {
                     <AutoTextarea>{profile?.profile?.bio}</AutoTextarea>
                 </div>
             </div>
-            <div className='bodyblock gap5'>
-                <div className='titleblock'>
-                    Навыки
-                </div>
-                <div className="textblock">
-                    <div className='skillsflex'>
-                        {profile?.skills.map((skill, index) => (
-                            <div key={index} className="propblock black">{skill.name}</div>
-                        ))}
-                    </div>
-                </div>
-                <div style={{ paddingTop: 25 + "px" }} className='titleblock'>
-                    Портфолио
-                </div>
-                <div className='textblock bfxcol gap10'>
-                    {profile.profile?.portfolio.map((item, index) => (
-                        <PortfolioItem key={index} item={item} viewFromProfile={true}></PortfolioItem>
-                    ))}
-                </div>
-            </div>
+
+            {profile?.user_type === "freelancer" && (
+                <SkillsAndPortfolio profile={profile}></SkillsAndPortfolio>
+            )}
 
             <div className='bodyblock gap10'>
-                <div style={{color: "var(--variable-collection-black"}} className="titleblock">
+                <div style={{color: "var(--variable-collection-black"}} className="titleblock bfxrow aic gap10">
                     Отзывы ({profileReviews.length})
+                    <SimpleButton icon={sortMethod ? "caret-down" : "caret-up"} onClick={switchSortMethod}>
+                        {sortMethod ? "Сначала положительные" : "Сначала отрицательные"}
+                    </SimpleButton>
                 </div>
                 <div className="textblock bfxcol gap10">
-                    {profileReviews?.map((review, index) => (
+                    {sortedReviews?.map((review, index) => (
                         <ReviewItem key={index} item={review}></ReviewItem>
                     ))}
                 </div>
