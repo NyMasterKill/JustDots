@@ -32,6 +32,15 @@ export const MyTasks = () => {
         fetchTasks();
     }, [myuser]);
 
+    const statusPriority = {
+        "Открытая": 1,
+        "В процессе": 2,
+        "Закрытая": 3
+    }
+    const sortedTasks = tasks.sort((a, b) => {
+        return statusPriority[a.status] - statusPriority[b.status];
+    });
+
     if (loading) {
         return (
             <>
@@ -71,7 +80,7 @@ export const MyTasks = () => {
             <div className="hatsaver"></div>
             <div className="blocktitle">мои заказы</div>
             <div className="bodyblock gap10">
-                {tasks.map((task) => (
+                {sortedTasks.map((task) => (
                     <Task key={task.id} task={task} />
                 ))}
             </div>
