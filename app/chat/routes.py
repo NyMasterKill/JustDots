@@ -1,23 +1,25 @@
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
+# chat/routes.py
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy import or_
+from typing import List, Dict
 from ..database import get_db
 from ..auth.dependencies import get_current_user_ws, get_current_user
 from ..auth.models import User
-from ..chat.models import ChatMessage
-from typing import Dict
+from .models import ChatMessage
 from .schemas import ChatMessageResponse
-from sqlalchemy import or_
-from typing import List, Dict
+from ..notifications.utils import send_notification  
 
 router = APIRouter()
 
-active_connections: Dict[int, WebSocket] = {}
+active_chat_connections: Dict[int, WebSocket] = {}
+
 
 @router.websocket("/ws/{user_id}")
-async def websocket_endpoint(websocket: WebSocket, user_id: int, db: Session = Depends(get_db),
-                             current_user: User = Depends(get_current_user_ws)):
+async def websocket_chat_endpoint(websocket: WebSocket, user_id: int, db: Session = Depends(get_db),
+                                 current_user: User = Depends(get_current_user_ws)):
     await websocket.accept()
-    active_connections[user_id] = websocket
+    active_chat_connections[user_id] = websocket
 
     try:
         while True:
@@ -43,26 +45,34 @@ async def websocket_endpoint(websocket: WebSocket, user_id: int, db: Session = D
             db.add(new_message)
             db.commit()
 
-            if to_user_id in active_connections:
-                await active_connections[to_user_id].send_json({
+            if to_user_id in active_chat_connections:
+                await active_chat_connections[to_user_id].send_json({
                     "sender_id": current_user.id,
                     "message": message,
                     "created_at": new_message.created_at.isoformat(),
                     "task_id": task_id
                 })
 
+            await send_notification(
+                db=db,
+                user_id=to_user_id,
+                type="message",
+                message=f"Новое сообщение от {current_user.username}",
+                task_id=task_id
+            )
+
     except WebSocketDisconnect:
-        active_connections.pop(user_id, None)
+        active_chat_connections.pop(user_id, None)
     except Exception as e:
         await websocket.send_json({"error": str(e)})
-        active_connections.pop(user_id, None)
+        active_chat_connections.pop(user_id, None)
 
 
 @router.get("/messages", response_model=List[ChatMessageResponse])
 async def get_chat_history(
-        with_user_id: int,
-        db: Session = Depends(get_db),
-        current_user: User = Depends(get_current_user)
+    with_user_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     messages = db.query(ChatMessage).filter(
         or_(

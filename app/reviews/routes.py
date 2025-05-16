@@ -6,11 +6,10 @@ from ..tasks.models import Task, TaskStatus
 from .models import Review
 from .schemas import ReviewCreate, ReviewResponse
 from ..auth.dependencies import get_current_user
-import logging
+from ..notifications.utils import send_notification
 
-logging.basicConfig(level=logging.DEBUG)
 
-router = APIRouter(prefix="/reviews", tags=["Reviews"])
+router = APIRouter()
 
 @router.post("/{task_id}/review", response_model=ReviewResponse, status_code=status.HTTP_201_CREATED)
 async def create_review(
@@ -65,6 +64,15 @@ async def create_review(
     if reviewer.profile:
         reviewer.profile.rating = average_rating
     db.commit()
+    
+    await send_notification(
+        db=db,
+        user_id=reviewer_id,
+        type="review_received",
+        message=f"Вы получили новый отзыв по задаче '{task.title}'",
+        task_id=task.id
+    )
+    
     return new_review
 
 @router.get("/user/{user_id}", response_model=list[ReviewResponse])

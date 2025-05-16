@@ -10,8 +10,9 @@ from app.users.models import Profile
 from typing import List, Optional
 from datetime import datetime, timezone
 from sqlalchemy.orm import joinedload
+from ..notifications.utils import send_notification
 
-router = APIRouter(prefix="/tasks", tags=["Tasks"])
+router = APIRouter()
 
 def validate_budget(budget_min: float | None, budget_max: float | None):
     if budget_min is not None and budget_max is not None:
@@ -61,8 +62,19 @@ async def create_task(
     db.add(new_task)
     db.commit()
     db.refresh(new_task)
+    
+    moderators = db.query(User).filter(User.user_type == UserType.MODERATOR).all()
+    for moderator in moderators:
+        await send_notification(
+            db=db,
+            user_id=moderator.id,
+            type="task_created",
+            message=f"Новая задача '{new_task.title}' ожидает модерации",
+            task_id=new_task.id
+        )
 
-    return TaskResponse.model_validate(new_task.__dict__)
+    return TaskResponse.model_validate(new_task)       
+
 
 @router.get("/", response_model=List[TaskResponse])
 async def get_tasks(
@@ -246,8 +258,17 @@ async def close_task(
     task.status = TaskStatus.CLOSED
     db.commit()
     db.refresh(task)
+    
+    if task.freelancer_id:
+        await send_notification(
+            db=db,
+            user_id=task.freelancer_id,
+            type="task_closed",
+            message=f"Задача '{task.title}' была закрыта заказчиком",
+            task_id=task.id
+        )
 
-    return TaskResponse.model_validate(task.__dict__)
+    return TaskResponse.model_validate(task)
 
 @router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_task(
@@ -285,7 +306,16 @@ async def approve_task(
     task.status = TaskStatus.OPEN
     db.commit()
     db.refresh(task)
-    return TaskResponse.model_validate(task.__dict__)
+    
+    await send_notification(
+        db=db,
+        user_id=task.owner_id,
+        type="task_approved",
+        message=f"Ваша задача '{task.title}' одобрена модератором",
+        task_id=task.id
+    )
+    
+    return TaskResponse.model_validate(task)
 
 @router.post("/{task_id}/moderate/reject", response_model=TaskResponse)
 async def reject_task(
@@ -305,8 +335,16 @@ async def reject_task(
     task.status = TaskStatus.REJECTED_BY_MODERATION
     db.commit()
     db.refresh(task)
+    
+    await send_notification(
+        db=db,
+        user_id=task.owner_id,
+        type="task_rejected",
+        message=f"Ваша задача '{task.title}' отклонена модератором",        
+        task_id=task.id
+    )
 
-    return TaskResponse.model_validate(task.__dict__)
+    return TaskResponse.model_validate(task)
 
 @router.post("/{task_id}/apply", response_model=ApplicationResponse, status_code=status.HTTP_201_CREATED)
 async def apply_for_task(
@@ -347,8 +385,16 @@ async def apply_for_task(
     db.add(new_application)
     db.commit()
     db.refresh(new_application)
+    
+    await send_notification(
+        db=db,
+        user_id=task.owner_id,
+        type="application_submitted",
+        message=f"Новая заявка на задачу '{task.title}' от фрилансера {current_user.username}",
+        task_id=task.id
+    )
 
-    return ApplicationResponse.model_validate(new_application.__dict__)
+    return ApplicationResponse.model_validate(new_application)
 
 @router.post("/{task_id}/applications/{application_id}/accept", response_model=TaskResponse)
 async def accept_application(
@@ -395,8 +441,16 @@ async def accept_application(
 
     db.commit()
     db.refresh(task)
+    
+    await send_notification(
+        db=db,
+        user_id=application.freelancer_id,
+        type="application_accepted",
+        message=f"Ваша заявка на задачу '{task.title}' была принята",
+        task_id=task.id
+    )
 
-    return TaskResponse.model_validate(task.__dict__)
+    return TaskResponse.model_validate(task)
 
 @router.post("/{task_id}/applications/{application_id}/reject", response_model=ApplicationResponse)
 async def reject_application(
@@ -424,8 +478,16 @@ async def reject_application(
     application.status = ApplicationStatus.REJECTED
     db.commit()
     db.refresh(application)
+    
+    await send_notification(
+        db=db,
+        user_id=application.freelancer_id,
+        type="application_rejected",
+        message=f"Ваша заявка на задачу '{task.title}' была отклонена",
+        task_id=task.id
+    )
 
-    return ApplicationResponse.model_validate(application.__dict__)
+    return ApplicationResponse.model_validate(application)
 
 @router.post("/applications/cancel", status_code=status.HTTP_204_NO_CONTENT)
 async def cancel_application(
@@ -435,6 +497,8 @@ async def cancel_application(
 ):
     if current_user.user_type != UserType.FREELANCER:
         raise HTTPException(status_code=403, detail="Только фрилансеры могут отменять заявки")
+
+    task = db.query(Task).filter(Task.id == app.task_id).first()
 
     app = db.query(Application).filter(
         Application.id == application_id,
@@ -447,4 +511,13 @@ async def cancel_application(
 
     db.delete(app)
     db.commit()
+    
+    await send_notification(
+        db=db,
+        user_id=task.owner_id,
+        type="application_cancelled",
+        message=f"Фрилансер {current_user.username} отменил заявку на задачу '{task.title}'",
+        task_id=task.id
+    )
+    
     return {"message": "Заявка успешно отменена"}

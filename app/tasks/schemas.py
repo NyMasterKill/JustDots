@@ -74,6 +74,7 @@ class TaskResponse(BaseModel):
     owner_profile: Optional[Profile] = None
 
     model_config = {"use_enum_values": True, "from_attributes": True}
+    
 
 class ApplicationCreate(BaseModel):
     comment: Optional[str] = None
