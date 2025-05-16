@@ -61,7 +61,7 @@ export const TaskViewer = () => {
         } catch (error) {
             {error.code == "ERR_BAD_REQUEST" && navigate("/login")};
             console.error('Ошибка при загрузке данных:', error);
-            notify({ message: "Ошибка при загрузке данных", type: "error", duration: 4200 });
+            notify({ message: "Заказ закрыт", type: "info", duration: 4200 });
         } finally {
             setLoading(false);
         }
@@ -138,6 +138,7 @@ export const TaskViewer = () => {
     const handleRecallApp = async () => {
         try{
             await api.post(`/tasks/tasks/applications/cancel/?application_id=${matchedApp.id}`);
+            notify({message: `Вы отозвали заявку на заказ #${task.id}`});
             update();
         }
         catch(error){

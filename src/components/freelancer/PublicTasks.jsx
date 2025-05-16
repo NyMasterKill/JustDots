@@ -49,6 +49,13 @@ export const PublicTasks = () => {
         setRefresh(prev => !prev);
     }
 
+    useEffect(() => {
+        const intervalId = setInterval(() => {
+            Refresher();
+        }, 5000);
+
+        return () => clearInterval(intervalId);
+    }, []);
 
     const [sortMethod, setSortMethod] = useState(false);
     const switchSortMethod = () => {

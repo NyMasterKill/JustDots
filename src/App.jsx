@@ -16,6 +16,7 @@ import {Moderator} from "./components/layouts/Moderator.jsx";
 import ModerateOrders from "./components/moderator/ModerateOrders.jsx";
 import Loader from "./components/Loader.jsx";
 import Landing from "./components/Landing.jsx";
+import MyApplications from "./components/freelancer/MyApplications.jsx";
 
 const App = () => {
   return (
@@ -34,6 +35,7 @@ const App = () => {
               </Route>
               <Route element={<Freelancer />}>
                 <Route path="/orders" element={<PublicTasks />} />
+                <Route path="/myapps" element={<MyApplications/>}/>
               </Route>
               <Route path="/mytasks" element={<MyTasks />} />
               <Route path="/task/:id" element={<TaskViewer />} />

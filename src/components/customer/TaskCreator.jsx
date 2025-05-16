@@ -112,28 +112,30 @@ export const TaskCreator = () => {
                             </select>
                         </div>
                         <div>
-                            <label className='iblabel'>Тип вознаграждения:</label>
-                            <div className='role-selector'>
-                                <input
-                                    className='roleradio'
-                                    value="fixed"
-                                    type="radio"
-                                    id='rolebut1'
-                                    name='roletoggle'
-                                    onChange={priceTypeChange}
-                                    defaultChecked
-                                />
-                                <label htmlFor='rolebut1' className='role-option'>Фиксированное</label>
-                                <div style={{ width: 2 + 'px', height: 38 + 'px', background: 'var(--variable-collection-border)' }}></div>
-                                <input
-                                    className='roleradio'
-                                    value="range"
-                                    type="radio"
-                                    id='rolebut2'
-                                    name='roletoggle'
-                                    onChange={priceTypeChange}
-                                />
-                                <label htmlFor='rolebut2' className='role-option'>Диапазон</label>
+                            <div className="textblock">
+                                <label className='iblabel'>Тип вознаграждения:</label>
+                                <div className='role-selector'>
+                                    <input
+                                        className='roleradio'
+                                        value="fixed"
+                                        type="radio"
+                                        id='rolebut1'
+                                        name='roletoggle'
+                                        onChange={priceTypeChange}
+                                        defaultChecked
+                                    />
+                                    <label htmlFor='rolebut1' className='role-option'>Фиксированное</label>
+                                    <div style={{ width: 2 + 'px', height: 38 + 'px', background: 'var(--variable-collection-border)' }}></div>
+                                    <input
+                                        className='roleradio'
+                                        value="range"
+                                        type="radio"
+                                        id='rolebut2'
+                                        name='roletoggle'
+                                        onChange={priceTypeChange}
+                                    />
+                                    <label htmlFor='rolebut2' className='role-option'>Диапазон</label>
+                                </div>
                             </div>
                         </div>
                         {pricetype == "fixed" ? (
@@ -144,7 +146,7 @@ export const TaskCreator = () => {
                                 <InputorWLabel label="до" type='number' min={budget_min + 1} onKeyDown={handleKeyDown} onChange={(e) => setMaxBudget(parseInt(e.target.value, 10))} required></InputorWLabel>
                             </>
                         )}
-                        <SimpleButton type="submit" style="black">Создать заказ</SimpleButton>
+                        <SimpleButton type="submit" icon="plus" style="black">Создать заказ</SimpleButton>
                     </form>
                 </div >
             </div >

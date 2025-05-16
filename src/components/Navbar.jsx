@@ -33,9 +33,14 @@ const Navbar = () => {
                             <>  {/* ШАПКА ПРИ АВТОРИЗАЦИИ */}
                                 <div className='hat-interactive-menu-act'>
                                     {myuser.user_type == "freelancer" ? (
-                                        <Link style={{textDecoration: "none"}} to="/orders">
-                                            <SimpleButton icon="search">Лента заказов</SimpleButton>
-                                        </Link>
+                                        <>
+                                            <Link style={{textDecoration: "none"}} to="/orders">
+                                                <SimpleButton icon="search">Лента заказов</SimpleButton>
+                                            </Link>
+                                            <Link style={{textDecoration: "none"}} to="/myapps">
+                                                <SimpleButton style="black" icon="quote-right"></SimpleButton>
+                                            </Link>
+                                        </>
                                     ) : (
                                         <Link style={{textDecoration: "none"}} to="/create">
                                             <SimpleButton style="black" icon="plus">Создать заказ</SimpleButton>
