@@ -498,14 +498,14 @@ async def cancel_application(
     if current_user.user_type != UserType.FREELANCER:
         raise HTTPException(status_code=403, detail="Только фрилансеры могут отменять заявки")
 
-    task = db.query(Task).filter(Task.id == app.task_id).first()
-
     app = db.query(Application).filter(
         Application.id == application_id,
         Application.freelancer_id == current_user.id,
         Application.status == ApplicationStatus.PENDING
     ).first()
 
+    task = db.query(Task).filter(Task.id == app.task_id).first()
+    
     if not app:
         raise HTTPException(status_code=404, detail="Заявка не найдена или уже обработана")
 
