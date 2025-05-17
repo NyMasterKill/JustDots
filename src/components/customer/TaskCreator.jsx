@@ -58,7 +58,7 @@ export const TaskCreator = () => {
         e.preventDefault();
         try {
             setLoading(true);
-            const response = await api.post("/tasks/tasks/create", { title, description, budget_min, budget_max, deadline, category, skill_level });
+            const response = await api.post("/tasks/create", { title, description, budget_min, budget_max, deadline, category, skill_level });
             notify({ message: "Задача успешно создана", type: "success", duration: 4200 });
         }
         catch (error) {

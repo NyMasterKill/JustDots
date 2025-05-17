@@ -18,7 +18,7 @@ export const MyTasks = () => {
         const fetchTasks = async () => {
             if (routefilter == null) return;
             try {
-                const response = await api.get(`/tasks/tasks/?filter=${routefilter}`);
+                const response = await api.get(`/tasks/?filter=${routefilter}`);
                 setTasks(response.data);
                 setLoading(false);
             } catch (err) {

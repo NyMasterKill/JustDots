@@ -13,7 +13,7 @@ export const Feedback = ({ taskid, onAction, closing }) => {
     const feedbackFetcher = async () => {
         if (!taskid) return;
         try {
-            const response = await api.get(`/tasks/tasks/applications/?task_id=${taskid}`);
+            const response = await api.get(`/tasks/applications/?task_id=${taskid}`);
             const filteredFeedbacks = response.data.filter(feedback => feedback.status === "На рассмотрении");
             setFeedbacks(filteredFeedbacks);
         }
@@ -29,7 +29,7 @@ export const Feedback = ({ taskid, onAction, closing }) => {
     const feedbackAccept = async (id) => {
         if (!id) return;
         try {
-            const response = await api.post(`/tasks/tasks/${taskid}/applications/${id}/accept`);
+            const response = await api.post(`/tasks/${taskid}/applications/${id}/accept`);
             console.log(response);
             notify({message: `Вы передали заказ #${taskid} в работу`, type: "success", duration: 4200});
         }
@@ -45,7 +45,7 @@ export const Feedback = ({ taskid, onAction, closing }) => {
     const feedbackReject = async (id) => {
         if (!id) return;
         try {
-            const response = await api.post(`/tasks/tasks/${taskid}/applications/${id}/reject`);
+            const response = await api.post(`/tasks/${taskid}/applications/${id}/reject`);
             console.log(response);
         }
         catch (error) {

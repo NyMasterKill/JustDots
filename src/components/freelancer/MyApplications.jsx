@@ -13,7 +13,7 @@ const MyApplications = () => {
     useEffect(() => {
         const appsFetcher = async () => {
             try{
-                const response = await api.get(`/tasks/tasks/applications`);
+                const response = await api.get(`/tasks/applications`);
                 setApps(response.data);
             }
             catch(error){
@@ -30,7 +30,7 @@ const MyApplications = () => {
 
     const handleRecallApp = async (app) => {
         try{
-            await api.post(`/tasks/tasks/applications/cancel/?application_id=${app.id}`);
+            await api.post(`/tasks/applications/cancel/?application_id=${app.id}`);
             notify({message: `Вы отозвали заявку на заказ #${app.task_id}`});
             updateSwitch();
         }

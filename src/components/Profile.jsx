@@ -51,7 +51,7 @@ const Profile = () => {
         const ReviewsFetcher = async () => {
             if(!profile) return;
             try{
-                const response = await api.get(`/reviews/reviews/user/${profile.id}`);
+                const response = await api.get(`/reviews/user/${profile.id}`);
                 setProfileReviews(response.data);
             }
             catch(error){

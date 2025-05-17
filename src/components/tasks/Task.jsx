@@ -53,7 +53,7 @@ export const Task = ({ task, trigger }) => {
 
     const handleTaskDelete = async () => {
         try {
-            await api.delete(`/tasks/tasks/${task.id}`);
+            await api.delete(`/tasks/${task.id}`);
             setIsDeleting(true);
             notify({ message: `Заказ #${task.id} удален`, type: "info", duration: 4200 });
         }

@@ -20,7 +20,7 @@ const MakeReview = ({task, taskowner, taskfreelancer, action}) => {
         e.preventDefault();
         if(!task) return;
         try{
-            api.post(`/reviews/reviews/${task.id}/review`, {comment: text, score: rating});
+            api.post(`/reviews/${task.id}/review`, {comment: text, score: rating});
             notify({message: `Вы успешно оставили отзыв по заказу #${task.id}`, type: "success", duration:4200});
         }
         catch(error){

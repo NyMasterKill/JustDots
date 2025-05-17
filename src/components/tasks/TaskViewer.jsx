@@ -41,7 +41,7 @@ export const TaskViewer = () => {
     const handleTaskFetch = async () => {
         if (!myuser) return;
         try {
-            const taskResponse = await api.get(`/tasks/tasks/${id}`);
+            const taskResponse = await api.get(`/tasks/${id}`);
             setTask(taskResponse.data);
 
             if (taskResponse.data.owner_id) {
@@ -76,7 +76,7 @@ export const TaskViewer = () => {
         const fetchAppsAndCheck = async () => {
             if(myuser === "customer" || !task) return;
             try{
-                const response = await api.get('/tasks/tasks/applications');
+                const response = await api.get('/tasks/applications');
                 const found = response.data.some(app => app.task_id === task.id);
                 const match = response.data.find(app => app.task_id === task.id);
                 setMatchedApp(match);
@@ -94,7 +94,7 @@ export const TaskViewer = () => {
 
     const handleTaskDelete = async () => {
         try {
-            await api.delete(`/tasks/tasks/${task.id}`);
+            await api.delete(`/tasks/${task.id}`);
             notify({ message: `Заказ #${task.id} удален`, type: "info", duration: 4200 });
         }
         catch (error) {
@@ -108,7 +108,7 @@ export const TaskViewer = () => {
 
     const handleConfirmTask = async () => {
         try {
-            await api.post(`/tasks/tasks/${task.id}/close`);
+            await api.post(`/tasks/${task.id}/close`);
             notify({ message: `Заказ #${task.id} завершен`, type: "success", duration: 4200 });
             handleTaskFetch();
         }
@@ -125,7 +125,7 @@ export const TaskViewer = () => {
 
         const nowdate = new Date().toISOString();
         try {
-            await api.post(`/tasks/tasks/${task.id}/apply`, { comment: appText, proposed_price: appPrice, proposed_deadline: nowdate })
+            await api.post(`/tasks/${task.id}/apply`, { comment: appText, proposed_price: appPrice, proposed_deadline: nowdate })
             notify({ message: `Вы подали заявку на выполнение заказа #${task.id}`, type: "info", duration: 4200 });
         }
         catch (error) {
@@ -137,7 +137,7 @@ export const TaskViewer = () => {
 
     const handleRecallApp = async () => {
         try{
-            await api.post(`/tasks/tasks/applications/cancel/?application_id=${matchedApp.id}`);
+            await api.post(`/tasks/applications/cancel/?application_id=${matchedApp.id}`);
             notify({message: `Вы отозвали заявку на заказ #${task.id}`});
             update();
         }

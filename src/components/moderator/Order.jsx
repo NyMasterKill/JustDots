@@ -40,7 +40,7 @@ const Order = ({task}) => {
     const Accept = async () => {
         try{
             if(isDeleting) return;
-            api.post(`/tasks/tasks/${task.id}/moderate/approve`);
+            api.post(`/tasks/${task.id}/moderate/approve`);
             notify({message: `Заказ #${task.id} принят`, type: "info", duration: 4200});
         }
         catch(error){
@@ -55,7 +55,7 @@ const Order = ({task}) => {
     const Decline = async () => {
         try{
             if(isDeleting) return;
-            api.post(`/tasks/tasks/${task.id}/moderate/reject`);
+            api.post(`/tasks/${task.id}/moderate/reject`);
             notify({message: `Заказ #${task.id} отклонен`, type: "info", duration: 4200});
         }
         catch(error){

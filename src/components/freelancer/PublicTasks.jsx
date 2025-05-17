@@ -29,7 +29,7 @@ export const PublicTasks = () => {
     const [curFilterSkill, setFilterSkill] = useState(1);
 
     useEffect(() => {
-        const routeurl = `/tasks/tasks/?filter=public${curFilterType > 1 ? `&category=${filterMapType[curFilterType]}` : ''}${curFilterSkill > 1 ? `&skill_level=${filterMapSkill[curFilterSkill]}` : ''}`;
+        const routeurl = `/tasks/?filter=public${curFilterType > 1 ? `&category=${filterMapType[curFilterType]}` : ''}${curFilterSkill > 1 ? `&skill_level=${filterMapSkill[curFilterSkill]}` : ''}`;
         const fetchTasks = async () => {
             try {
                 const response = await api.get(routeurl);

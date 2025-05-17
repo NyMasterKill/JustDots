@@ -11,7 +11,7 @@ const ModerateOrders = () => {
     useEffect(() => {
         const fetchTasks = async () => {
             try {
-                const response = await api.get('/tasks/tasks/?status=На рассмотрении модерацией');
+                const response = await api.get('/tasks/?status=На рассмотрении модерацией');
                 setTasks(response.data);
             } catch (err) {
                 {err.code == "ERR_BAD_REQUEST" && navigate("/login")};
